@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/plus-jakarta-sans-latin-wght-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+/* Design tokens from the UKM Foundations file. Components only ever use these variables. */
+:root, :root[data-theme="light"] {
+  --bg: #F8FAFC; --surface: #FFFFFF; --subtle: #F1F5F9; --elevated: #FFFFFF;
+  --fg: #0F172A; --fg2: #475569; --muted: #556275;
+  --border: #CBD5E1; --border-soft: #E2E8F0; --control: #64748B;
+  --primary: #0B7A5B; --primary-hover: #065F46; --on-primary: #FFFFFF;
+  --link: #0B7A5B; --selected: #ECFDF5; --mint: #D1FAE5; --accent: #22C55E;
+  --warn-bg: #FEF3C7; --warn-fg: #78350F; --danger: #B91C1C; --danger-bg: #FEE2E2;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0B1220; --surface: #111C2E; --subtle: #1E293B; --elevated: #263449;
+  --fg: #F8FAFC; --fg2: #CBD5E1; --muted: #94A3B8;
+  --border: #475569; --border-soft: #334155; --control: #7C8BA1;
+  --primary: #0B7A5B; --primary-hover: #099268; --on-primary: #FFFFFF;
+  --link: #34D399; --selected: #123B32; --mint: #123B32; --accent: #22C55E;
+  --warn-bg: #422006; --warn-fg: #FDE68A; --danger: #FCA5A5; --danger-bg: #450A0A;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --color-bg: var(--bg); --color-surface: var(--surface); --color-subtle: var(--subtle);
+  --color-elevated: var(--elevated); --color-fg: var(--fg); --color-fg2: var(--fg2);
+  --color-muted: var(--muted); --color-line: var(--border); --color-control: var(--control); --color-soft: var(--border-soft);
+  --color-brand: var(--primary); --color-brand-hover: var(--primary-hover);
+  --color-on-brand: var(--on-primary); --color-link: var(--link); --color-selected: var(--selected);
+  --color-mint: var(--mint); --color-accent: var(--accent); --color-warn: var(--warn-bg);
+  --color-warn-fg: var(--warn-fg); --color-danger: var(--danger); --color-danger-bg: var(--danger-bg);
+}
+
+html { scroll-padding-top: 5rem; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+@media (min-width: 640px) { body { font-size: 15px; } }
+
+:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 6px; }
+.skip-link { position: absolute; left: 8px; top: -64px; z-index: 100; background: var(--primary); color: var(--on-primary); padding: 10px 16px; border-radius: 8px; font-weight: 600; }
+.skip-link:focus { top: 8px; }
+
+/* Low-data mode hides decorative and non-essential visuals. */
+:root[data-lowdata="1"] .decor { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+.prose-lesson p { margin: 0 0 1rem; max-width: 68ch; line-height: 1.75; font-size: 1rem; color: var(--fg); }
+.prose-lesson h3 { margin: 1.5rem 0 .5rem; font-size: 1.125rem; font-weight: 700; }
+.prose-lesson ul { margin: 0 0 1rem 1.25rem; list-style: disc; max-width: 68ch; line-height: 1.7; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}

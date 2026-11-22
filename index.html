@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="UKM University: discover courses, enrol, learn, track progress and earn certificates. A fictional demonstration platform." />
+    <meta name="color-scheme" content="light dark" />
+    <title>UKM University | Online learning and skills development</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B7A5B'/%3E%3Ctext x='16' y='22' font-size='15' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='white'%3EU%3C/text%3E%3C/svg%3E" />
+    <link rel="preload" href="./fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Apply the saved or system theme before first paint to avoid a flash.
+      try {
+        var s = JSON.parse(localStorage.getItem('ukm-prefs') || '{}');
+        var t = s.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = t;
+        if (s.lowData) document.documentElement.dataset.lowdata = '1';
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>UKM University needs JavaScript enabled to run this demonstration.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
