@@ -4,11 +4,11 @@ import { Award, BookMarked, BookOpen, CheckCircle2, Clock, GraduationCap, Librar
 import { allLessons, categoryById, instructorById, naira, type Course, type CategoryId } from '../data'
 import { courseDone, useApp, type Progress } from '../store'
 
-const base = 'inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed'
+const base = 'pressable inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-[var(--radius-control)] text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed'
 export const btnPrimary = `${base} bg-brand text-on-brand hover:bg-brand-hover`
 export const btnSecondary = `${base} border border-control bg-surface text-fg hover:bg-subtle`
 export const btnGhost = `${base} text-fg2 hover:bg-subtle`
-export const card = 'rounded-2xl border border-soft bg-surface'
+export const card = 'rounded-[var(--radius-card)] border border-soft bg-surface'
 
 export const CATEGORY_ICON: Record<CategoryId, typeof Award> = {
   undergraduate: GraduationCap,
@@ -25,7 +25,7 @@ export function PageTitle({ title, children, className = '' }: { title: string; 
     h?.focus({ preventScroll: true })
   }, [title])
   return (
-    <h1 id="page-title" tabIndex={-1} className={`text-[28px] leading-9 md:text-[32px] md:leading-10 font-bold outline-none ${className}`}>
+    <h1 id="page-title" tabIndex={-1} className={`font-display text-[32px] leading-[1.08] md:text-[42px] md:leading-[1.08] font-medium tracking-[-.025em] outline-none ${className}`}>
       {children ?? title}
     </h1>
   )
@@ -33,7 +33,7 @@ export function PageTitle({ title, children, className = '' }: { title: string; 
 
 export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'brand' | 'warn' }) {
   const t = tone === 'brand' ? 'bg-selected text-link border-line' : tone === 'warn' ? 'bg-warn text-warn-fg border-transparent' : 'bg-subtle text-fg2 border-soft'
-  return <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${t}`}>{children}</span>
+  return <span className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-semibold ${t}`}>{children}</span>
 }
 
 /** Progress is always shown as a bar AND text, never colour alone. */
@@ -62,9 +62,10 @@ export function courseProgress(course: Course, p?: Progress) {
 export function CourseTile({ course, size = 'md' }: { course: Course; size?: 'md' | 'lg' }) {
   const Icon = CATEGORY_ICON[course.category]
   return (
-    <div className={`${size === 'lg' ? 'h-32' : 'h-20'} rounded-xl bg-mint text-link flex items-center justify-between px-4`} aria-hidden="true">
-      <Icon size={size === 'lg' ? 40 : 28} />
-      <span className="font-bold tracking-wide text-sm">{course.code}</span>
+    <div className={`${size === 'lg' ? 'min-h-32' : 'min-h-20'} relative overflow-hidden rounded-lg bg-tint-1 text-link flex items-end justify-between px-4 py-3`} aria-hidden="true">
+      <span className="absolute -right-3 -top-8 font-display text-[7.5rem] leading-none text-brand/10 select-none">{course.code.slice(-2)}</span>
+      <Icon size={size === 'lg' ? 30 : 22} strokeWidth={1.6} />
+      <span className="relative font-mono text-xs font-semibold tracking-[.12em]">{course.code}</span>
     </div>
   )
 }
@@ -84,27 +85,28 @@ export function CourseCard({ course }: { course: Course }) {
         {status && <Badge tone={status === 'Intake closed' ? 'warn' : 'brand'}>{status === 'Completed' && <CheckCircle2 size={12} aria-hidden="true" />}{status}</Badge>}
       </div>
       <div>
-        <h3 className="text-lg font-semibold leading-6">
+        <h3 className="font-display text-[22px] leading-[1.15] font-medium tracking-[-.01em]">
           <Link to={`/courses/${course.id}`} className="hover:underline after:absolute after:inset-0 after:content-['']">{course.title}</Link>
         </h3>
-        <p className="text-xs text-muted mt-0.5">{course.code} · {course.subject}</p>
+        <p className="text-sm text-muted mt-1">{course.subject}</p>
       </div>
-      <p className="text-fg2 line-clamp-2">{course.summary}</p>
+      <p className="text-sm text-fg2 line-clamp-2">{course.summary}</p>
       <dl className="mt-auto grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-fg2">
         <div className="flex items-center gap-1.5 col-span-2"><User size={14} aria-hidden="true" /><dt className="sr-only">Instructor</dt><dd>{inst.name}</dd></div>
         <div className="flex items-center gap-1.5"><Clock size={14} aria-hidden="true" /><dt className="sr-only">Duration</dt><dd>{course.weeks} weeks</dd></div>
         <div className="flex items-center gap-1.5"><BookOpen size={14} aria-hidden="true" /><dt className="sr-only">Difficulty</dt><dd>{course.difficulty}</dd></div>
       </dl>
       <div className="flex items-center justify-between pt-3 border-t border-soft">
-        <span className="font-bold">{naira(course.price)}</span>
-        <span className="text-sm font-semibold text-link">{p ? (cp.complete ? 'View course' : 'Continue') : course.open ? 'View details' : 'Details'}</span>
+        <span className="font-semibold tabular-nums">{naira(course.price)} <span className="font-normal text-xs text-muted">{course.price === 0 ? 'no fee' : ''}</span></span>
+        <span className="text-sm font-semibold text-link">{p ? (cp.complete ? 'View course' : 'Continue') : course.open ? 'Course details' : 'Details'}</span>
       </div>
     </article>
   )
 }
 
-export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: (props: { id: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }) => ReactNode }) {
-  const id = useId()
+export function Field({ label, error, hint, id: providedId, children }: { label: string; error?: string; hint?: string; id?: string; children: (props: { id: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }) => ReactNode }) {
+  const generatedId = useId()
+  const id = providedId ?? generatedId
   const desc = [hint ? `${id}-h` : '', error ? `${id}-e` : ''].filter(Boolean).join(' ') || undefined
   return (
     <div>
@@ -115,7 +117,7 @@ export function Field({ label, error, hint, children }: { label: string; error?:
     </div>
   )
 }
-export const inputCls = 'w-full min-h-11 rounded-lg border border-control bg-surface px-3 text-fg placeholder:text-muted'
+export const inputCls = 'w-full min-h-11 rounded-[var(--radius-control)] border border-control bg-surface px-3 text-fg placeholder:text-muted'
 
 export function Notice({ children, tone = 'info' }: { children: ReactNode; tone?: 'info' | 'warn' | 'error' }) {
   const t = tone === 'error' ? 'bg-danger-bg text-danger border-transparent' : tone === 'warn' ? 'bg-warn text-warn-fg border-transparent' : 'bg-selected text-fg border-line'

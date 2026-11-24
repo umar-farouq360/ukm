@@ -7,37 +7,39 @@
   font-display: swap;
 }
 
-/* Design tokens from the UKM Foundations file. Components only ever use these variables. */
+/* UKM academic editorial system. Components consume semantic tokens only. */
 :root, :root[data-theme="light"] {
-  --bg: #F8FAFC; --surface: #FFFFFF; --subtle: #F1F5F9; --elevated: #FFFFFF;
-  --fg: #0F172A; --fg2: #475569; --muted: #556275;
-  --border: #CBD5E1; --border-soft: #E2E8F0; --control: #64748B;
-  --primary: #0B7A5B; --primary-hover: #065F46; --on-primary: #FFFFFF;
-  --link: #0B7A5B; --selected: #ECFDF5; --mint: #D1FAE5; --accent: #22C55E;
+  --bg: #F5F5EF; --surface: #FFFEFA; --subtle: #EBEEE7; --elevated: #FFFFFF;
+  --fg: #17251F; --fg2: #405248; --muted: #596C60;
+  --border: #B9C5BB; --border-soft: #D9E0D8; --control: #687C6F;
+  --primary: #155C45; --primary-hover: #104936; --on-primary: #FFFFFF;
+  --link: #155C45; --selected: #E3EEE7; --mint: #D7E6DA; --accent: #9A6428;
   --warn-bg: #FEF3C7; --warn-fg: #78350F; --danger: #B91C1C; --danger-bg: #FEE2E2;
-  /* Soft category tints (pastel, serene). Used as surfaces; text on them stays fg / fg2. */
-  --tint-1: #DCFCE7; --tint-2: #F1EEFE; --tint-3: #E0F2FE; --tint-4: #FEF3C7;
-  --deep: #065F46;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 12px -4px rgba(15, 23, 42, .08);
-  --shadow-md: 0 2px 4px rgba(15, 23, 42, .04), 0 16px 32px -12px rgba(15, 23, 42, .16);
+  --tint-1: #E4ECE2; --tint-2: #EFECE1; --tint-3: #E7ECE9; --tint-4: #F1E9D8;
+  --deep: #183F32;
+  --shadow-sm: 0 1px 2px rgba(23, 37, 31, .05), 0 5px 16px -10px rgba(23, 37, 31, .16);
+  --shadow-md: 0 5px 20px -12px rgba(23, 37, 31, .24);
+  --radius-card: 0.875rem; --radius-control: 0.5rem;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: #0B1220; --surface: #111C2E; --subtle: #1E293B; --elevated: #263449;
-  --fg: #F8FAFC; --fg2: #CBD5E1; --muted: #94A3B8;
-  --border: #475569; --border-soft: #334155; --control: #7C8BA1;
-  --primary: #0B7A5B; --primary-hover: #099268; --on-primary: #FFFFFF;
-  --link: #34D399; --selected: #123B32; --mint: #123B32; --accent: #22C55E;
-  --warn-bg: #422006; --warn-fg: #FDE68A; --danger: #FCA5A5; --danger-bg: #450A0A;
-  --tint-1: #123B32; --tint-2: #2A2650; --tint-3: #123349; --tint-4: #3A2E12;
-  --deep: #065F46;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 12px -4px rgba(0, 0, 0, .4);
-  --shadow-md: 0 2px 4px rgba(0, 0, 0, .3), 0 16px 32px -12px rgba(0, 0, 0, .55);
+  --bg: #111916; --surface: #18231E; --subtle: #202D27; --elevated: #27372F;
+  --fg: #F0F2EA; --fg2: #CBD5CC; --muted: #A8B5AA;
+  --border: #596A5F; --border-soft: #35463B; --control: #829388;
+  --primary: #28734F; --primary-hover: #34835E; --on-primary: #FFFFFF;
+  --link: #9BCBB0; --selected: #223A2E; --mint: #2B4034; --accent: #D8AC69;
+  --warn-bg: #3B2D18; --warn-fg: #F2CF8B; --danger: #F2A09A; --danger-bg: #442421;
+  --tint-1: #21382D; --tint-2: #34372D; --tint-3: #263630; --tint-4: #3B3324;
+  --deep: #102B22;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .18), 0 5px 16px -10px rgba(0, 0, 0, .5);
+  --shadow-md: 0 5px 20px -12px rgba(0, 0, 0, .6);
+  --radius-card: 0.875rem; --radius-control: 0.5rem;
   color-scheme: dark;
 }
 
 @theme inline {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
   --color-bg: var(--bg); --color-surface: var(--surface); --color-subtle: var(--subtle);
   --color-elevated: var(--elevated); --color-fg: var(--fg); --color-fg2: var(--fg2);
   --color-muted: var(--muted); --color-line: var(--border); --color-control: var(--control); --color-soft: var(--border-soft);
@@ -51,10 +53,11 @@
 }
 
 html { scroll-padding-top: 5rem; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-@media (min-width: 640px) { body { font-size: 15px; } }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+:root { --ease-out: cubic-bezier(.23, 1, .32, 1); --ease-in-out: cubic-bezier(.77, 0, .175, 1); }
 
 :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 6px; }
+button:not(:disabled), summary { cursor: pointer; }
 .skip-link { position: absolute; left: 8px; top: -64px; z-index: 100; background: var(--primary); color: var(--on-primary); padding: 10px 16px; border-radius: 8px; font-weight: 600; }
 .skip-link:focus { top: 8px; }
 
@@ -85,8 +88,10 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); f
 .reveal[data-in="true"] { opacity: 1; transform: none; }
 
 /* Gentle hover lift for cards. */
-.lift { transition: transform .25s ease, box-shadow .25s ease; }
-@media (hover: hover) { .lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); } }
+.lift { transition: transform 180ms var(--ease-out), box-shadow 180ms ease, border-color 180ms ease; }
+@media (hover: hover) and (pointer: fine) { .lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); } }
+.pressable { transition: transform 140ms var(--ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
+.pressable:active:not(:focus-visible) { transform: scale(.98); }
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -95,6 +100,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); f
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
   .anim-rise, .anim-grow { animation: none; }
+  .pressable:active:not(:focus-visible) { transform: none; }
 }
 
 .prose-lesson p { margin: 0 0 1rem; max-width: 68ch; line-height: 1.75; font-size: 1rem; color: var(--fg); }
@@ -104,4 +110,5 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); f
 @media print {
   .no-print { display: none !important; }
   body { background: #fff; }
+  .certificate { --surface: #fff; --fg: #17251F; --fg2: #405248; --muted: #596C60; --border-soft: #D9E0D8; --link: #155C45; --primary: #155C45; color: #17251F !important; border-color: #155C45 !important; box-shadow: none !important; }
 }

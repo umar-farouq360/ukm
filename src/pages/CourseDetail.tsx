@@ -28,23 +28,23 @@ export default function CourseDetail() {
   else cta = <Link to={`/enrol/${course.id}`} className={btnPrimary}>{course.price === 0 ? 'Enrol for free' : `Enrol for ${naira(course.price)}`}</Link>
 
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-6 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-7 md:px-6 md:py-11">
       <nav aria-label="Breadcrumb" className="text-sm text-fg2 flex flex-wrap items-center gap-1 mb-4">
         <Link to="/courses" className="hover:underline">Courses</Link><ChevronRight size={14} aria-hidden="true" />
         <Link to={`/courses?category=${cat.id}`} className="hover:underline">{cat.short}</Link><ChevronRight size={14} aria-hidden="true" />
         <span aria-current="page" className="font-semibold text-fg">{course.code}</span>
       </nav>
 
-      <div className="grid lg:grid-cols-[1fr_340px] gap-8 items-start">
-        <div className="lg:col-start-1 space-y-8 order-2 lg:order-1">
+      <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-14">
+        <div className="order-2 space-y-10 lg:order-1 lg:col-start-1">
           <section aria-labelledby="overview">
-            <h2 id="overview" className="text-2xl font-bold">Overview</h2>
-            <p className="mt-2 text-base text-fg2 max-w-3xl">{course.description}</p>
+            <h2 id="overview" className="font-display text-2xl font-medium">Course overview</h2>
+            <p className="mt-3 max-w-3xl leading-relaxed text-fg2">{course.description}</p>
           </section>
 
           <section aria-labelledby="learn">
-            <h2 id="learn" className="text-2xl font-bold">What you will learn</h2>
-            <ul className="mt-3 grid sm:grid-cols-2 gap-3">
+            <h2 id="learn" className="font-display text-2xl font-medium">What you will learn</h2>
+            <ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
               {course.objectives.map((o) => (
                 <li key={o} className="flex gap-2.5"><CheckCircle2 size={20} className="shrink-0 text-link mt-0.5" aria-hidden="true" /><span>{o}</span></li>
               ))}
@@ -52,12 +52,12 @@ export default function CourseDetail() {
           </section>
 
           <section aria-labelledby="outline">
-            <h2 id="outline" className="text-2xl font-bold">Course outline</h2>
+            <h2 id="outline" className="font-display text-2xl font-medium">Course outline</h2>
             <p className="text-fg2 mt-1">{course.modules.length} modules, {lessons.length} lessons, about {Math.round(minutes / 60 * 10) / 10} hours of learning.</p>
             <div className="mt-4 space-y-3">
               {course.modules.map((m, i) => (
                 <details key={m.id} className={`${card} group`} open={i === 0}>
-                  <summary className="cursor-pointer list-none flex items-center justify-between gap-3 p-4 min-h-14 font-semibold">
+                  <summary className="pressable flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 p-4 font-semibold marker:hidden">
                     <span>Module {i + 1}: {m.title}</span>
                     <span className="text-xs font-normal text-muted whitespace-nowrap">{m.lessons.length} lessons</span>
                   </summary>
@@ -79,30 +79,30 @@ export default function CourseDetail() {
           </section>
 
           <section aria-labelledby="inst" className="max-w-3xl">
-            <h2 id="inst" className="text-2xl font-bold">Your instructor</h2>
-            <div className={`${card} p-4 mt-3 flex gap-4`}>
+            <h2 id="inst" className="font-display text-2xl font-medium">Course instructor</h2>
+            <div className="mt-4 flex gap-4 border-y border-soft py-5">
               <span className="size-14 shrink-0 rounded-full bg-mint text-link grid place-items-center font-bold text-lg" aria-hidden="true">{inst.name.split(' ').filter((w) => /^[A-Z]/.test(w) && !/\./.test(w))[0]?.[0]}{inst.name.split(' ').at(-1)?.[0]}</span>
               <div>
                 <p className="font-semibold">{inst.name}</p>
                 <p className="text-sm text-muted">{inst.title}</p>
-                <p className="mt-2 text-fg2">{inst.bio}</p>
+              <p className="mt-2 leading-relaxed text-fg2">{inst.bio}</p>
               </div>
             </div>
           </section>
 
           <section aria-labelledby="req" className="grid sm:grid-cols-2 gap-6 max-w-3xl">
             <div>
-              <h2 id="req" className="text-xl font-bold">Prerequisites</h2>
+            <h2 id="req" className="font-display text-xl font-medium">Prerequisites</h2>
               <p className="mt-2 text-fg2">{course.prerequisites}</p>
             </div>
             <div>
-              <h2 className="text-xl font-bold">Expected outcomes</h2>
+              <h2 className="font-display text-xl font-medium">Expected outcomes</h2>
               <ul className="mt-2 list-disc pl-5 text-fg2 space-y-1">{course.outcomes.map((o) => <li key={o}>{o}</li>)}</ul>
             </div>
           </section>
         </div>
 
-        <div className="lg:col-start-2 lg:row-start-1 order-1 lg:order-2 space-y-4 lg:sticky lg:top-20">
+        <div className="order-1 space-y-4 lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1 lg:order-2">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-3">
               <Badge tone="brand">{cat.short}</Badge>
@@ -112,14 +112,14 @@ export default function CourseDetail() {
             </div>
             <PageTitle title={course.title} className="!text-[28px]">{course.title}</PageTitle>
             <p className="text-sm text-muted mt-1">{course.code}</p>
-            <p className="text-base text-fg2 mt-3">{course.summary}</p>
+            <p className="mt-3 leading-relaxed text-fg2">{course.summary}</p>
           </div>
 
-          <div className={`${card} p-5 space-y-4`}>
+          <div className={`${card} p-5 shadow-soft`}>
             <CourseTile course={course} />
-            <p className="text-2xl font-bold">{naira(course.price)}{course.price > 0 && <span className="text-sm font-normal text-muted"> one-off fee</span>}</p>
-            {p && <ProgressBar done={cp.done} total={cp.total} label={`${cp.done} of ${cp.total} lessons complete`} />}
-            {cta}
+            <p className="mt-4 text-2xl font-semibold tabular-nums">{naira(course.price)}{course.price > 0 && <span className="text-sm font-normal text-muted"> one-off fee</span>}</p>
+            {p && <div className="mt-4"><ProgressBar done={cp.done} total={cp.total} label={`${cp.done} of ${cp.total} lessons complete`} /></div>}
+            <div className="mt-4">{cta}</div>
             {!user && course.open && <p className="text-xs text-muted">You will be asked to sign in or create an account first.</p>}
             {p?.via === 'allocated' && <p className="text-xs text-muted">This course is allocated to your programme.</p>}
             <dl className="grid grid-cols-2 gap-3 pt-4 border-t border-soft text-sm">

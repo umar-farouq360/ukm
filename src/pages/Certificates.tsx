@@ -33,21 +33,22 @@ function CertificateView({ courseId }: { courseId: string }) {
         <button onClick={() => window.print()} className={btnPrimary}><Printer size={16} aria-hidden="true" />Print or save as PDF</button>
       </div>
 
-      <section aria-label={`Certificate for ${course.title}`} className="rounded-2xl border-4 border-double border-brand bg-white text-slate-900 p-6 sm:p-10 text-center">
-        <GraduationCap size={40} className="mx-auto" style={{ color: '#0B7A5B' }} aria-hidden="true" />
-        <p className="mt-2 text-sm font-semibold tracking-widest uppercase" style={{ color: '#065F46' }}>UKM University</p>
+      <section aria-label={`Demonstration certificate for ${course.title}`} className="certificate rounded-xl border-2 border-double border-brand bg-surface p-6 text-center text-fg sm:p-10">
+        <p className="mx-auto mb-6 inline-flex min-h-8 items-center border border-accent px-3 font-mono text-[10px] font-semibold uppercase tracking-[.14em] text-accent">Fictional demo certificate</p>
+        <GraduationCap size={40} className="mx-auto text-link" aria-hidden="true" />
+        <p className="mt-2 text-sm font-semibold uppercase tracking-widest text-link">UKM University</p>
         <PageTitle title={`Certificate: ${course.title}`} className="!text-[30px] sm:!text-[36px] mt-4">Certificate of Completion</PageTitle>
-        <p className="mt-6 text-slate-600">This certifies that</p>
-        <p className="mt-1 text-3xl font-bold">{user.name}</p>
-        <p className="mt-4 text-slate-600">has successfully completed</p>
-        <p className="mt-1 text-2xl font-bold" style={{ color: '#065F46' }}>{course.title}</p>
-        <p className="text-sm text-slate-600 mt-1">{course.code} · {categoryById(course.category).name}</p>
-        <dl className="mt-8 grid sm:grid-cols-3 gap-4 text-sm text-left sm:text-center">
-          <div><dt className="text-slate-600">Date of completion</dt><dd className="font-semibold">{longDate(p.completedOn)}</dd></div>
-          <div><dt className="text-slate-600">Instructor</dt><dd className="font-semibold">{instructorById(course.instructorId).name}</dd></div>
-          <div><dt className="text-slate-600">Certificate number</dt><dd className="font-semibold">UKM-{course.code}-{year}</dd></div>
+        <p className="mt-6 text-fg2">This certifies that</p>
+        <p className="mt-1 font-display text-3xl font-medium">{user.name}</p>
+        <p className="mt-4 text-fg2">has successfully completed</p>
+        <p className="mt-1 font-display text-2xl font-medium text-link">{course.title}</p>
+        <p className="mt-1 text-sm text-fg2">{course.code} · {categoryById(course.category).name}</p>
+        <dl className="mt-8 grid gap-4 border-t border-soft pt-5 text-left text-sm sm:grid-cols-3 sm:text-center">
+          <div><dt className="text-muted">Date of completion</dt><dd className="font-semibold">{longDate(p.completedOn)}</dd></div>
+          <div><dt className="text-muted">Instructor</dt><dd className="font-semibold">{instructorById(course.instructorId).name}</dd></div>
+          <div><dt className="text-muted">Certificate number</dt><dd className="font-semibold">UKM-{course.code}-{year}</dd></div>
         </dl>
-        <p className="mt-8 text-xs text-slate-600 border-t border-slate-200 pt-4">Demonstration certificate. UKM University is a fictional institution and this certificate has no real-world standing.</p>
+        <p className="mt-8 border-t border-soft pt-4 text-xs text-muted">Demonstration certificate. UKM University is fictional and this certificate has no real-world standing.</p>
       </section>
     </div>
   )
@@ -62,26 +63,25 @@ export default function Certificates() {
   const inProgress = Object.entries(progress).map(([cid, p]) => ({ course: courseById(cid)!, p })).filter((e) => e.course && !courseProgress(e.course, e.p).complete && e.p.lessons.length > 0)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 md:px-6 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       <PageTitle title="Certificates and achievements">Certificates and achievements</PageTitle>
       <p className="text-fg2 mt-1">Your completed courses, certificates and learning milestones.</p>
 
       <section aria-labelledby="certs" className="mt-8">
-        <h2 id="certs" className="text-2xl font-bold">Completed courses and certificates</h2>
+        <h2 id="certs" className="font-display text-2xl font-medium">Completed courses and certificates</h2>
         {done.length === 0 ? (
-          <div className={`${card} p-6 mt-4 text-center`}>
+          <div className="mt-4 border-y border-soft py-7 text-center">
             <Award size={28} className="mx-auto text-muted" aria-hidden="true" />
             <p className="font-semibold mt-2">No certificates yet</p>
             <p className="text-fg2">Finish every lesson in a course to earn your first certificate.</p>
             <Link to="/dashboard" className={`${btnSecondary} mt-4`}>Go to my courses</Link>
           </div>
         ) : (
-          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+            <ul className="mt-4 divide-y divide-soft border-y border-soft">
             {done.map(({ course, p }) => (
-              <li key={course.id} className={`${card} p-5 flex flex-col gap-3`}>
-                <CheckCircle2 size={24} className="text-link" aria-hidden="true" />
-                <div><h3 className="text-lg font-semibold">{course.title}</h3><p className="text-sm text-muted">{course.code} · Completed {longDate(p.completedOn)}</p></div>
-                <Link to={`/certificates/${course.id}`} className={`${btnPrimary} mt-auto`}><Award size={16} aria-hidden="true" />View certificate</Link>
+              <li key={course.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
+                <div className="flex min-w-0 items-start gap-3"><CheckCircle2 size={20} className="mt-1 shrink-0 text-link" aria-hidden="true" /><div><h3 className="font-display text-xl font-medium">{course.title}</h3><p className="text-sm text-muted">{course.code} · Completed {longDate(p.completedOn)}</p></div></div>
+                <Link to={`/certificates/${course.id}`} className={btnSecondary}><Award size={16} aria-hidden="true" />View certificate</Link>
               </li>
             ))}
           </ul>
@@ -92,7 +92,7 @@ export default function Certificates() {
       </section>
 
       <section aria-labelledby="ach" className="mt-10">
-        <h2 id="ach" className="text-2xl font-bold">Achievements</h2>
+        <h2 id="ach" className="font-display text-2xl font-medium">Achievements</h2>
         <p className="text-fg2 mt-1">Current learning streak: {streak} {streak === 1 ? 'day' : 'days'}.</p>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {achievements.map((a) => (

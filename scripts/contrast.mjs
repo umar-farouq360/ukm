@@ -2,8 +2,8 @@
 const lum = (h) => { const c = [1,3,5].map(i => parseInt(h.slice(i,i+2),16)/255).map(v => v<=0.03928 ? v/12.92 : ((v+0.055)/1.055)**2.4); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2] }
 const ratio = (a,b) => { const [x,y] = [lum(a),lum(b)].sort((p,q)=>q-p); return (x+0.05)/(y+0.05) }
 const T = {
-  light: { bg:'#F8FAFC', surface:'#FFFFFF', subtle:'#F1F5F9', fg:'#0F172A', fg2:'#475569', muted:'#556275', border:'#64748B', primary:'#0B7A5B', onPrimary:'#FFFFFF', link:'#0B7A5B', selected:'#ECFDF5', mint:'#D1FAE5', warn:'#FEF3C7', warnFg:'#78350F', danger:'#B91C1C', dangerBg:'#FEE2E2', t1:'#DCFCE7', t2:'#F1EEFE', t3:'#E0F2FE', t4:'#FEF3C7', deep:'#065F46' },
-  dark:  { bg:'#0B1220', surface:'#111C2E', subtle:'#1E293B', fg:'#F8FAFC', fg2:'#CBD5E1', muted:'#94A3B8', border:'#7C8BA1', primary:'#0B7A5B', onPrimary:'#FFFFFF', link:'#34D399', selected:'#123B32', mint:'#123B32', warn:'#422006', warnFg:'#FDE68A', danger:'#FCA5A5', dangerBg:'#450A0A', t1:'#123B32', t2:'#2A2650', t3:'#123349', t4:'#3A2E12', deep:'#065F46' },
+  light: { bg:'#F5F5EF', surface:'#FFFEFA', subtle:'#EBEEE7', fg:'#17251F', fg2:'#405248', muted:'#596C60', border:'#687C6F', primary:'#155C45', onPrimary:'#FFFFFF', link:'#155C45', selected:'#E3EEE7', mint:'#D7E6DA', warn:'#FEF3C7', warnFg:'#78350F', danger:'#B91C1C', dangerBg:'#FEE2E2', t1:'#E4ECE2', t2:'#EFECE1', t3:'#E7ECE9', t4:'#F1E9D8', deep:'#183F32' },
+  dark:  { bg:'#111916', surface:'#18231E', subtle:'#202D27', fg:'#F0F2EA', fg2:'#CBD5CC', muted:'#A8B5AA', border:'#829388', primary:'#28734F', onPrimary:'#FFFFFF', link:'#9BCBB0', selected:'#223A2E', mint:'#2B4034', warn:'#3B2D18', warnFg:'#F2CF8B', danger:'#F2A09A', dangerBg:'#442421', t1:'#21382D', t2:'#34372D', t3:'#263630', t4:'#3B3324', deep:'#102B22' },
 }
 let fail = 0
 for (const [name,t] of Object.entries(T)) {

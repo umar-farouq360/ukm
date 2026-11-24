@@ -65,7 +65,7 @@ export default function Courses() {
   const catName = CATEGORIES.find((c) => c.id === category)
 
   const filters = (
-    <div className="grid gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
       <Select id="f-cat" label="Programme category" value={category} onChange={(v) => set('category', v)} options={CATEGORIES.map((c) => ({ value: c.id, label: c.short }))} />
       <Select id="f-sub" label="Subject area" value={subject} onChange={(v) => set('subject', v)} options={SUBJECTS.map((s) => ({ value: s, label: s }))} />
       {category === 'undergraduate' && <Select id="f-lvl" label="Level" value={level} onChange={(v) => set('level', v)} options={['100 Level', '200 Level', '300 Level'].map((s) => ({ value: s, label: s }))} />}
@@ -77,11 +77,11 @@ export default function Courses() {
   )
 
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-6 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
       <PageTitle title={catName ? catName.name : 'Course discovery'}>{catName ? catName.name : 'Find a course'}</PageTitle>
       <p className="text-fg2 mt-1">{catName ? catName.description : 'Search the catalogue or narrow it down with filters.'}</p>
 
-      <form role="search" onSubmit={(e) => { e.preventDefault(); set('q', draft.trim()) }} className="mt-5 flex gap-2 max-w-2xl">
+      <form role="search" onSubmit={(e) => { e.preventDefault(); set('q', draft.trim()) }} className="mt-6 flex max-w-3xl gap-2">
         <label htmlFor="q" className="sr-only">Search by course name, code, subject or instructor</label>
         <div className="relative flex-1">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -90,13 +90,13 @@ export default function Courses() {
         <button className="inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-brand text-on-brand font-semibold hover:bg-brand-hover">Search</button>
       </form>
 
-      <div className="mt-6 grid lg:grid-cols-[260px_1fr] gap-6 items-start">
+      <div className="mt-7 grid items-start gap-6 lg:grid-cols-[250px_1fr]">
         <aside aria-label="Filters" className="lg:sticky lg:top-20">
-          <button onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen} aria-controls="filters" className={`${btnSecondary} w-full lg:hidden`}>
-            <SlidersHorizontal size={16} aria-hidden="true" />Filters{active ? ` (${active})` : ''}
+          <button onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen} aria-controls="filters" className={`${btnSecondary} w-full justify-between lg:hidden`}>
+            <span className="inline-flex items-center gap-2"><SlidersHorizontal size={16} aria-hidden="true" />Filters{active ? ` (${active})` : ''}</span><span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
           </button>
-          <div id="filters" className={`${card} p-4 mt-3 lg:mt-0 ${filtersOpen ? '' : 'hidden'} lg:block`}>
-            <h2 className="hidden lg:block text-base font-semibold mb-3">Filters</h2>
+          <div id="filters" className={`${card} mt-3 p-4 lg:mt-0 ${filtersOpen ? '' : 'hidden'} lg:block`}>
+            <h2 className="mb-4 hidden font-display text-xl font-medium lg:block">Narrow results</h2>
             {filters}
           </div>
         </aside>
@@ -111,13 +111,22 @@ export default function Courses() {
               <label htmlFor="sort" className="text-[13px] font-semibold">Sort by</label>
               <select id="sort" value={sort} onChange={(e) => set('sort', e.target.value)} className={`${inputCls} w-auto`}>
                 <option value="">Relevance</option>
-                <option value="popular">Most popular</option>
+                <option value="popular">Demo picks first</option>
                 <option value="title">Title A to Z</option>
                 <option value="duration">Shortest first</option>
                 <option value="price">Lowest price</option>
               </select>
             </div>
           </div>
+
+          {active > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2" aria-label="Applied filters">
+              {[q && ['q', `Search: ${q}`], category && ['category', CATEGORIES.find((c) => c.id === category)?.short ?? category], subject && ['subject', subject], level && ['level', level], duration && ['duration', DURATIONS.find((d) => d.id === duration)?.label ?? duration], difficulty && ['difficulty', difficulty], price && ['price', price === 'free' ? 'Free' : 'Paid']]
+                .filter((item): item is [string, string] => Boolean(item))
+                .map(([key, label]) => <button key={key} onClick={() => set(key, '')} className="pressable inline-flex min-h-9 items-center gap-2 rounded-md border border-control px-2.5 text-xs font-semibold text-fg hover:bg-subtle">{label}<X size={13} aria-hidden="true" /><span className="sr-only">Remove filter</span></button>)}
+              <button onClick={clear} className="min-h-9 px-2 text-xs font-semibold text-link underline underline-offset-2">Clear all</button>
+            </div>
+          )}
 
           {loading ? (
             <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true">

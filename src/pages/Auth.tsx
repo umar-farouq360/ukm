@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { DEMO_EMAIL, DEMO_PASSWORD, useApp } from '../store'
 import { PROGRAMMES } from '../data'
-import { Field, Notice, PageTitle, btnPrimary, btnSecondary, card, inputCls } from '../components/ui'
+import { Field, PageTitle, btnPrimary, btnSecondary, inputCls } from '../components/ui'
 
 export default function Auth({ mode }: { mode: 'login' | 'register' }) {
   const { user, signIn, register } = useApp()
@@ -12,9 +13,15 @@ export default function Auth({ mode }: { mode: 'login' | 'register' }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [programme, setProgramme] = useState('none')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
+  const errorRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (formError || Object.keys(errors).length > 0) errorRef.current?.focus()
+  }, [errors, formError])
 
   if (user) return <Navigate to={next} replace />
   const isLogin = mode === 'login'
@@ -47,10 +54,10 @@ export default function Auth({ mode }: { mode: 'login' | 'register' }) {
   return (
     <div className="mx-auto max-w-md px-4 py-10">
       <PageTitle title={isLogin ? 'Sign in' : 'Create account'}>{isLogin ? 'Sign in' : 'Create your account'}</PageTitle>
-      <p className="text-fg2 mt-1">{isLogin ? 'Welcome back. Pick up where you stopped.' : 'Create a free account to enrol and track your progress.'}</p>
+      <p className="mt-2 text-fg2">{isLogin ? 'Welcome back. Pick up where you stopped.' : 'Create a demo account to enrol and track your progress.'}</p>
 
       {isLogin && (
-        <div className={`${card} p-4 mt-5 bg-selected`}>
+        <div className="mt-6 border-l-4 border-brand bg-selected p-4">
           <p className="font-semibold">Reviewing this demo?</p>
           <p className="text-sm text-fg2 mt-1">Sign in with the sample learner who has a completed course, one in progress and allocated courses.</p>
           <button onClick={useDemo} className={`${btnPrimary} mt-3 w-full`}>Use demo login</button>
@@ -58,21 +65,24 @@ export default function Auth({ mode }: { mode: 'login' | 'register' }) {
         </div>
       )}
 
-      <form onSubmit={submit} noValidate className={`${card} p-5 mt-5 space-y-4`}>
-        {formError && <Notice tone="error">{formError}</Notice>}
+      <form onSubmit={submit} noValidate className="mt-7 max-w-md space-y-4 border-t border-soft pt-6">
+        {(formError || Object.keys(errors).length > 0) && <div ref={errorRef} tabIndex={-1} role="alert" className="rounded-md border border-danger/40 bg-danger-bg p-3 text-sm text-danger outline-none">
+          <p className="font-semibold">{formError || 'Please correct the following fields.'}</p>
+          {!formError && <ul className="mt-1 list-inside list-disc">{Object.entries(errors).map(([key, message]) => <li key={key}><a className="underline underline-offset-2" href={`#auth-${key}`}>{message}</a></li>)}</ul>}
+        </div>}
         {!isLogin && (
-          <Field label="Full name" error={errors.name}>
+          <Field id="auth-name" label="Full name" error={errors.name}>
             {(p) => <input {...p} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={inputCls} />}
           </Field>
         )}
-        <Field label="Email" error={errors.email}>
+        <Field id="auth-email" label="Email" error={errors.email}>
           {(p) => <input {...p} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={inputCls} />}
         </Field>
-        <Field label="Password" error={errors.password} hint="At least 8 characters.">
-          {(p) => <input {...p} type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={isLogin ? 'current-password' : 'new-password'} className={inputCls} />}
+        <Field id="auth-password" label="Password" error={errors.password} hint="At least 8 characters.">
+          {(p) => <div className="relative"><input {...p} type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={isLogin ? 'current-password' : 'new-password'} className={`${inputCls} pr-12`} /><button type="button" onClick={() => setShowPassword((show) => !show)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="pressable absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-md text-fg2 hover:bg-subtle"><span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></div>}
         </Field>
         {!isLogin && (
-          <Field label="Your programme" hint="Choosing a programme adds its core courses to your dashboard automatically.">
+        <Field id="auth-programme" label="Your programme" hint="Choosing a programme adds its core courses to your dashboard automatically.">
             {(p) => (
               <select {...p} value={programme} onChange={(e) => setProgramme(e.target.value)} className={inputCls}>
                 {PROGRAMMES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}

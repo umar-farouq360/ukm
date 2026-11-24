@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { Award, Bell, Bot, CheckCircle2, Flame, Pencil, RotateCcw } from 'lucide-react'
+import { Award, Bot, CheckCircle2, Flame, Pencil, RotateCcw } from 'lucide-react'
 import { COURSES, PROGRAMMES, allLessons, courseById, instructorById, naira, type Course } from '../data'
 import { useApp, type Progress } from '../store'
-import { openAssistant } from '../components/Assistant'
-import { Badge, CourseCard, PageTitle, ProgressBar, btnPrimary, btnSecondary, card, courseProgress } from '../components/ui'
+import { openAssistant } from '../components/assistant-events'
+import { Badge, CourseCard, PageTitle, ProgressBar, btnPrimary, btnSecondary, courseProgress } from '../components/ui'
 
 export function nextLessonId(course: Course, p?: Progress) {
   const ls = allLessons(course)
@@ -25,33 +25,31 @@ export default function Dashboard() {
   const completed = entries.filter((e) => courseProgress(e.course, e.p).complete)
   const recent = [...active].filter((e) => e.p.accessed).sort((a, b) => (b.p.accessed ?? '').localeCompare(a.p.accessed ?? ''))[0] ?? active[0]
   const programme = PROGRAMMES.find((x) => x.id === user.programme)
-
   const outstanding = active.flatMap(({ course, p }) =>
     allLessons(course).filter((l) => l.type === 'activity' && !p.lessons.includes(l.id)).slice(0, 2).map((l) => ({ course, lesson: l })),
   ).slice(0, 5)
-
   const subjects = new Set(entries.map((e) => e.course.subject))
   const recs = COURSES.filter((c) => c.open && !progress[c.id])
     .sort((a, b) => Number(subjects.has(b.subject)) - Number(subjects.has(a.subject)) || Number(!!b.popular) - Number(!!a.popular))
     .slice(0, 3)
-
   const earned = achievements.filter((a) => a.earned)
 
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-6 py-8">
-      <PageTitle title="My learning">Welcome back, {user.name.split(' ')[0]}</PageTitle>
-      <p className="text-fg2 mt-1">{programme && programme.id !== 'none' ? `${programme.label}. ` : ''}Here is what to do next.</p>
+    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
+      <header className="border-b border-soft pb-6">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[.14em] text-link">Learner dashboard</p>
+        <PageTitle title="My learning">Welcome back, {user.name.split(' ')[0]}</PageTitle>
+        <p className="mt-2 text-fg2">{programme && programme.id !== 'none' ? `${programme.label}. ` : ''}Pick up where you left off.</p>
+      </header>
 
       {recent ? (
-        <section aria-labelledby="continue" className={`${card} p-5 mt-6 border-brand`}>
-          <h2 id="continue" className="text-sm font-semibold text-link">Continue learning</h2>
-          <div className="mt-2 grid md:grid-cols-[1fr_auto] gap-4 items-center">
-            <div>
-              <p className="text-xl font-bold">{recent.course.title}</p>
-              <p className="text-sm text-fg2">
-                Next up: {allLessons(recent.course).find((l) => l.id === nextLessonId(recent.course, recent.p))?.title} · Last studied {fmt(recent.p.accessed).toLowerCase()}
-              </p>
-              <div className="mt-3 max-w-md">
+        <section aria-labelledby="continue" className="mt-7 border-l-4 border-brand bg-selected px-5 py-5 md:px-7 md:py-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[.12em] text-link">Continue learning</p>
+              <h2 id="continue" className="font-display mt-2 text-2xl font-medium md:text-3xl">{recent.course.title}</h2>
+              <p className="mt-1 text-sm text-fg2">Next: {allLessons(recent.course).find((l) => l.id === nextLessonId(recent.course, recent.p))?.title} <span className="text-muted">· Last studied {fmt(recent.p.accessed).toLowerCase()}</span></p>
+              <div className="mt-4 max-w-lg">
                 {(() => { const cp = courseProgress(recent.course, recent.p); return <ProgressBar done={cp.done} total={cp.total} label={`${cp.modulesDone} of ${cp.modulesTotal} modules · ${cp.done} of ${cp.total} lessons`} /> })()}
               </div>
             </div>
@@ -59,46 +57,50 @@ export default function Dashboard() {
           </div>
         </section>
       ) : (
-        <section className={`${card} p-6 mt-6 text-center`}>
-          <h2 className="text-xl font-semibold">You are not enrolled in any courses yet</h2>
-          <p className="text-fg2 mt-1">Find a course that suits your goals.</p>
+        <section aria-labelledby="continue" className="mt-7 border-l-4 border-brand bg-selected px-5 py-5 md:px-7 md:py-6">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[.12em] text-link">Your next step</p>
+          <h2 id="continue" className="font-display mt-2 text-2xl font-medium md:text-3xl">Choose a course to begin</h2>
+          <p className="mt-1 text-fg2">Explore the catalogue and review the course outline before enrolling.</p>
           <Link to="/courses" className={`${btnPrimary} mt-4`}>Browse courses</Link>
         </section>
       )}
 
-      <div className="mt-8 grid lg:grid-cols-[1fr_340px] gap-8 items-start">
-        <div className="space-y-10">
-          {active.length > 0 && (
-            <section aria-labelledby="mine">
-              <h2 id="mine" className="text-2xl font-bold">My courses</h2>
-              <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-12">
+          <section aria-labelledby="mine">
+            <div className="flex items-end justify-between gap-3 border-b border-soft pb-3">
+              <h2 id="mine" className="font-display text-2xl font-medium">My courses</h2>
+              <span className="text-sm text-muted">{active.length} in progress</span>
+            </div>
+            {active.length === 0 ? <p className="py-5 text-sm text-fg2">Courses you enrol in will appear here.</p> : (
+              <ul className="divide-y divide-soft">
                 {active.map(({ course, p }) => {
                   const cp = courseProgress(course, p)
                   const state = p.lessons.length === 0 && p.via === 'allocated' ? 'Allocated' : p.lessons.length === 0 ? 'Not started' : 'In progress'
                   return (
-                    <li key={course.id} className={`${card} p-4 flex flex-col gap-3`}>
-                      <div className="flex flex-wrap gap-1.5"><Badge tone="brand">{state}</Badge>{p.via === 'allocated' && <Badge>Allocated to programme</Badge>}</div>
-                      <div>
-                        <h3 className="text-lg font-semibold leading-6">{course.title}</h3>
-                        <p className="text-xs text-muted">{course.code} · {instructorById(course.instructorId).name}</p>
+                    <li key={course.id} className="grid gap-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap gap-2"><Badge tone="brand">{state}</Badge>{p.via === 'allocated' && <Badge>Programme course</Badge>}</div>
+                        <h3 className="font-display text-xl font-medium leading-tight">{course.title}</h3>
+                        <p className="mt-1 text-sm text-muted">{course.code} · {instructorById(course.instructorId).name}</p>
+                        <div className="mt-3 max-w-lg"><ProgressBar done={cp.done} total={cp.total} label={`${cp.modulesDone} of ${cp.modulesTotal} modules complete`} /></div>
+                        <p className="mt-2 text-xs text-muted">Last accessed: {fmt(p.accessed)}</p>
                       </div>
-                      <ProgressBar done={cp.done} total={cp.total} label={`${cp.modulesDone} of ${cp.modulesTotal} modules complete`} />
-                      <p className="text-xs text-muted">Last accessed: {fmt(p.accessed)}</p>
-                      <Link to={`/learn/${course.id}/${nextLessonId(course, p)}`} className={`${btnPrimary} mt-auto`}>{cp.done ? 'Continue learning' : 'Start course'}</Link>
+                      <Link to={`/learn/${course.id}/${nextLessonId(course, p)}`} className={btnSecondary}>{cp.done ? 'Continue course' : 'Start course'}</Link>
                     </li>
                   )
                 })}
               </ul>
-            </section>
-          )}
+            )}
+          </section>
 
           {completed.length > 0 && (
             <section aria-labelledby="done">
-              <h2 id="done" className="text-2xl font-bold">Completed courses</h2>
-              <ul className="mt-4 space-y-3">
+              <div className="border-b border-soft pb-3"><h2 id="done" className="font-display text-2xl font-medium">Completed courses</h2></div>
+              <ul className="divide-y divide-soft">
                 {completed.map(({ course, p }) => (
-                  <li key={course.id} className={`${card} p-4 flex flex-wrap items-center gap-3 justify-between`}>
-                    <div className="flex items-center gap-3"><CheckCircle2 className="text-link" size={22} aria-hidden="true" /><div><p className="font-semibold">{course.title}</p><p className="text-xs text-muted">Completed {p.completedOn}</p></div></div>
+                  <li key={course.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+                    <div className="flex min-w-0 items-start gap-3"><CheckCircle2 className="mt-1 shrink-0 text-link" size={19} aria-hidden="true" /><div><p className="font-semibold">{course.title}</p><p className="text-sm text-muted">Completed {p.completedOn}</p></div></div>
                     <Link to={`/certificates/${course.id}`} className={btnSecondary}><Award size={16} aria-hidden="true" />View certificate</Link>
                   </li>
                 ))}
@@ -107,56 +109,37 @@ export default function Dashboard() {
           )}
 
           <section aria-labelledby="rec">
-            <h2 id="rec" className="text-2xl font-bold">Recommended for you</h2>
-            <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {recs.map((c) => <li key={c.id} className="relative"><CourseCard course={c} /></li>)}
-            </ul>
+            <div className="border-b border-soft pb-3"><h2 id="rec" className="font-display text-2xl font-medium">More from the catalogue</h2><p className="mt-1 text-sm text-fg2">Courses related to subjects in your current learning list.</p></div>
+            {recs.length ? <ul className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{recs.map((c) => <li key={c.id} className="relative"><CourseCard course={c} /></li>)}</ul> : <p className="py-5 text-sm text-fg2">You have explored every currently open course in this demo catalogue.</p>}
           </section>
         </div>
 
-        <aside className="space-y-6" aria-label="Activity and updates">
-          <section aria-labelledby="todo" className={`${card} p-4`}>
-            <h2 id="todo" className="text-lg font-semibold">Outstanding activities</h2>
-            {outstanding.length === 0 ? <p className="text-fg2 mt-2">Nothing outstanding. Nice work.</p> : (
-              <ul className="mt-3 divide-y divide-soft">
+        <aside className="space-y-8" aria-label="Activity and milestones">
+          <section aria-labelledby="todo">
+            <div className="border-b border-soft pb-3"><h2 id="todo" className="font-display text-xl font-medium">Practice activities</h2></div>
+            {outstanding.length === 0 ? <p className="mt-3 text-sm text-fg2">No activities waiting for you.</p> : (
+              <ul className="mt-2 divide-y divide-soft">
                 {outstanding.map(({ course, lesson }) => (
-                  <li key={lesson.id}>
-                    <Link to={`/learn/${course.id}/${lesson.id}`} className="flex gap-3 py-3 min-h-11 hover:bg-subtle rounded-lg px-1">
-                      <Pencil size={16} className="mt-1 text-muted shrink-0" aria-hidden="true" />
-                      <span><span className="block font-semibold text-sm">{lesson.title}</span><span className="block text-xs text-muted">{course.code} · about {lesson.minutes} min</span></span>
-                    </Link>
-                  </li>
+                  <li key={lesson.id}><Link to={`/learn/${course.id}/${lesson.id}`} className="pressable flex min-h-14 items-start gap-3 py-3 hover:text-link"><Pencil size={15} className="mt-1 shrink-0 text-muted" aria-hidden="true" /><span><span className="block text-sm font-semibold">{lesson.title}</span><span className="block text-xs text-muted">{course.code} · about {lesson.minutes} min</span></span></Link></li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section aria-labelledby="ach" className={`${card} p-4`}>
-            <div className="flex items-center justify-between">
-              <h2 id="ach" className="text-lg font-semibold">Achievements</h2>
-              <Link to="/certificates" className="text-sm font-semibold text-link">View all</Link>
-            </div>
-            <p className="text-sm text-fg2 mt-1 flex items-center gap-1.5"><Flame size={16} aria-hidden="true" />{streak > 0 ? `${streak}-day learning streak` : 'Start a streak by learning today'}</p>
+          <section aria-labelledby="ach">
+            <div className="border-b border-soft pb-3"><h2 id="ach" className="font-display text-xl font-medium">Milestones</h2></div>
+            <p className="mt-3 flex items-center gap-2 text-sm text-fg2"><Flame size={16} aria-hidden="true" />{streak > 0 ? `${streak}-day learning streak` : 'Complete a lesson to begin a streak'}</p>
             <ul className="mt-3 space-y-2">
-              {earned.length === 0 ? <li className="text-fg2">Complete a lesson to earn your first achievement.</li> : earned.slice(0, 3).map((a) => (
-                <li key={a.id} className="flex gap-2 text-sm"><Award size={16} className="text-link shrink-0 mt-0.5" aria-hidden="true" />{a.title}</li>
-              ))}
+              {earned.length === 0 ? <li className="text-sm text-fg2">Complete a lesson to earn your first achievement.</li> : earned.slice(0, 3).map((a) => <li key={a.id} className="flex gap-2 text-sm"><Award size={16} className="mt-0.5 shrink-0 text-link" aria-hidden="true" />{a.title}</li>)}
             </ul>
+            <Link to="/certificates" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-link underline underline-offset-4">Certificates and achievements</Link>
           </section>
 
-          <section aria-labelledby="news" className={`${card} p-4`}>
-            <h2 id="news" className="text-lg font-semibold flex items-center gap-2"><Bell size={16} aria-hidden="true" />Announcements</h2>
-            <ul className="mt-3 space-y-3 text-sm">
-              <li><span className="font-semibold">Low-data mode is available.</span> Use the toggle in the header to hide decorative visuals.</li>
-              <li><span className="font-semibold">Postgraduate Leadership intake has closed.</span> The next intake opens in the new year.</li>
-            </ul>
+          <section className="border-t border-soft pt-5">
+            <p className="text-sm text-fg2">Course fees are shown in naira. {naira(0)} courses have no fee in this demonstration.</p>
+            <button onClick={openAssistant} className={`${btnSecondary} mt-4 w-full`}><Bot size={16} aria-hidden="true" />Ask the learning assistant</button>
+            {user.email === 'demo@ukm.example' && <button onClick={() => { if (confirm('Reset all demo data in this browser?')) resetDemo() }} className="pressable mt-2 inline-flex min-h-11 items-center gap-2 text-xs text-muted underline"><RotateCcw size={13} aria-hidden="true" />Reset demo data</button>}
           </section>
-
-          <button onClick={openAssistant} className={`${btnSecondary} w-full`}><Bot size={16} aria-hidden="true" />Ask the learning assistant</button>
-          {user.email === 'demo@ukm.example' && (
-            <button onClick={() => { if (confirm('Reset all demo data in this browser?')) resetDemo() }} className="text-xs text-muted underline inline-flex items-center gap-1 min-h-11"><RotateCcw size={12} aria-hidden="true" />Reset demo data</button>
-          )}
-          <p className="text-xs text-muted">Fees on recommended courses are in naira; {naira(0)} means no charge.</p>
         </aside>
       </div>
     </div>

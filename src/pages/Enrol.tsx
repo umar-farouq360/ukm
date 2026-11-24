@@ -70,18 +70,18 @@ export default function Enrol() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 md:px-6 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       <PageTitle title={`Enrol in ${course.title}`}>Enrol in this course</PageTitle>
-      <ol className="mt-3 flex flex-wrap gap-x-4 text-sm text-fg2" aria-label="Enrolment steps">
-        <li className="text-link font-semibold">1. Review and confirm</li>
-        <li>2. {paid ? 'Demo payment' : 'No payment needed'}</li>
-        <li>3. Start learning</li>
+      <ol className="mt-5 grid max-w-2xl grid-cols-3 gap-3 border-y border-soft py-3 text-xs sm:text-sm" aria-label="Enrolment steps">
+        <li className="font-semibold text-link"><span className="mr-2 font-mono text-accent">01</span>Review course</li>
+        <li className="text-fg2"><span className="mr-2 font-mono text-accent">02</span>{paid ? 'Demo payment' : 'Confirm enrolment'}</li>
+        <li className="text-fg2"><span className="mr-2 font-mono text-accent">03</span>Start learning</li>
       </ol>
 
-      <div className="mt-6 grid md:grid-cols-[1fr_320px] gap-6 items-start">
-        <form onSubmit={submit} noValidate className={`${card} p-5 space-y-5`}>
+      <div className="mt-7 grid items-start gap-8 md:grid-cols-[minmax(0,1fr)_320px]">
+        <form onSubmit={submit} noValidate className="space-y-6 border-t-2 border-brand pt-5">
           <section aria-labelledby="req">
-            <h2 id="req" className="text-lg font-semibold">Requirements check</h2>
+            <h2 id="req" className="font-display text-xl font-medium">Review before confirming</h2>
             <ul className="mt-2 space-y-2">
               <li className="flex gap-2"><CheckCircle2 size={18} className="text-link shrink-0 mt-0.5" aria-hidden="true" /><span><strong>Intake open.</strong> You can enrol now.</span></li>
               <li className="flex gap-2"><CheckCircle2 size={18} className="text-link shrink-0 mt-0.5" aria-hidden="true" /><span><strong>Prerequisites:</strong> {course.prerequisites}</span></li>
@@ -89,8 +89,8 @@ export default function Enrol() {
           </section>
 
           {paid && (
-            <section aria-labelledby="pay" className="space-y-3">
-              <h2 id="pay" className="text-lg font-semibold flex items-center gap-2"><CreditCard size={18} aria-hidden="true" />Payment</h2>
+            <section aria-labelledby="pay" className="space-y-3 border-t border-soft pt-5">
+              <h2 id="pay" className="flex items-center gap-2 font-display text-xl font-medium"><CreditCard size={18} aria-hidden="true" />Payment</h2>
               <Notice tone="warn"><strong>Demo payment, no real charge.</strong> Do not enter real card details. This demonstration does not collect any.</Notice>
               <Field label="Name of person paying" error={errors.payer}>
                 {(p) => <input {...p} value={payer} onChange={(e) => setPayer(e.target.value)} className={inputCls} autoComplete="off" />}
@@ -98,7 +98,7 @@ export default function Enrol() {
             </section>
           )}
 
-          <div>
+          <div className="border-t border-soft pt-5">
             <label className="flex items-start gap-3 min-h-11">
               <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="size-5 mt-0.5 accent-[var(--primary)]" aria-describedby={errors.agree ? 'agree-err' : undefined} />
               <span>I have read the course details{paid ? ` and understand the fee of ${naira(course.price)}` : ''}.</span>
@@ -106,14 +106,14 @@ export default function Enrol() {
             {errors.agree && <p id="agree-err" role="alert" className="text-xs font-semibold text-danger mt-1">{errors.agree}</p>}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            <button type="submit" disabled={processing} className={btnPrimary}>{processing ? 'Processing…' : paid ? `Confirm and pay ${naira(course.price)} (demo)` : 'Confirm enrolment'}</button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button type="submit" disabled={processing} aria-busy={processing} className={btnPrimary}>{processing ? 'Processing…' : paid ? `Confirm and pay ${naira(course.price)} (demo)` : 'Confirm enrolment'}</button>
             <Link to={`/courses/${course.id}`} className={btnSecondary}>Cancel</Link>
           </div>
         </form>
 
-        <aside aria-label="Order summary" className={`${card} p-5`}>
-          <h2 className="text-lg font-semibold">Summary</h2>
+        <aside aria-label="Order summary" className="rounded-[var(--radius-card)] border border-soft bg-subtle p-5">
+          <h2 className="font-display text-xl font-medium">Course summary</h2>
           <p className="mt-2 font-semibold">{course.title}</p>
           <p className="text-sm text-muted">{course.code} · {cat.short}</p>
           <dl className="mt-4 space-y-2 text-sm">

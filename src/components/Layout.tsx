@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Award, BookOpen, GraduationCap, LayoutDashboard, LogOut, Menu, Moon, Sun, WifiOff, X } from 'lucide-react'
+import { Award, BookOpen, LayoutDashboard, LogOut, Menu, Moon, Sun, WifiOff, X } from 'lucide-react'
 import { CATEGORIES } from '../data'
 import { useApp } from '../store'
-import Assistant from './Assistant'
 import { btnGhost, btnPrimary, btnSecondary } from './ui'
 
+const Assistant = lazy(() => import('./Assistant'))
+
 const navCls = ({ isActive }: { isActive: boolean }) =>
-  `px-3 min-h-11 inline-flex items-center rounded-lg text-sm font-semibold ${isActive ? 'bg-selected text-link' : 'text-fg2 hover:bg-subtle'}`
+  `pressable min-h-11 inline-flex items-center border-b-2 px-3 text-sm font-semibold ${isActive ? 'border-brand text-link' : 'border-transparent text-fg2 hover:text-fg'}`
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg min-h-11" aria-label="UKM University home">
-      <span className="size-9 rounded-lg bg-brand text-on-brand grid place-items-center" aria-hidden="true"><GraduationCap size={20} /></span>
-      <span>UKM <span className="font-semibold text-fg2">University</span></span>
+    <Link to="/" className="pressable flex min-h-11 items-center gap-2.5 font-semibold" aria-label="UKM University home">
+      <span className="grid size-9 place-items-center border border-brand bg-selected font-display text-xl text-link" aria-hidden="true">U</span>
+      <span className="text-[15px] tracking-[-.02em]">UKM <span className="font-normal text-fg2">University</span></span>
     </Link>
   )
 }
@@ -21,14 +22,18 @@ function Logo() {
 export default function Layout() {
   const { user, theme, toggleTheme, lowData, toggleLowData, signOut } = useApp()
   const [menu, setMenu] = useState(false)
+  const [assistantLoaded, setAssistantLoaded] = useState(false)
   const loc = useLocation()
   const nav = useNavigate()
 
   useEffect(() => { setMenu(false); window.scrollTo(0, 0) }, [loc.pathname])
+  useEffect(() => {
+    const activate = () => setAssistantLoaded(true)
+    window.addEventListener('ukm:assistant', activate)
+    return () => window.removeEventListener('ukm:assistant', activate)
+  }, [])
 
   const out = () => { signOut(); nav('/') }
-  const inLesson = loc.pathname.startsWith('/learn/')
-
   const links = (
     <>
       <NavLink to="/" end className={navCls}>Home</NavLink>
@@ -42,10 +47,10 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <a href="#main" className="skip-link">Skip to main content</a>
 
-      <header className="no-print sticky top-0 z-30 bg-surface border-b border-soft">
-        <div className="mx-auto max-w-7xl px-4 md:px-6 flex items-center gap-3 h-16">
+      <header className="no-print sticky top-0 z-30 border-b border-soft bg-surface/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 md:px-6">
           <Logo />
-          <nav aria-label="Main" className="hidden lg:flex items-center gap-1 ml-4">{links}</nav>
+          <nav aria-label="Main" className="ml-4 hidden items-center gap-1 lg:flex">{links}</nav>
           <div className="ml-auto flex items-center gap-1">
             <button onClick={toggleLowData} aria-pressed={lowData} title="Low-data mode hides decorative visuals" className={`${btnGhost} px-3 ${lowData ? 'bg-selected text-link' : ''}`}>
               <WifiOff size={18} aria-hidden="true" /><span className="hidden sm:inline">Low-data {lowData ? 'on' : 'off'}</span><span className="sr-only sm:hidden">Low-data mode {lowData ? 'on' : 'off'}</span>
@@ -72,7 +77,7 @@ export default function Layout() {
           </div>
         </div>
         {menu && (
-          <div id="mobile-menu" className="lg:hidden border-t border-soft px-4 py-3 flex flex-col gap-1 bg-surface">
+          <div id="mobile-menu" className="lg:hidden border-t border-soft bg-surface px-4 py-3">
             <nav aria-label="Mobile" className="flex flex-col gap-1">
               {links}
               <p className="text-xs font-semibold text-muted px-3 pt-3">Programmes</p>
@@ -92,11 +97,11 @@ export default function Layout() {
         )}
       </header>
 
-      <main id="main" tabIndex={-1} className="flex-1 outline-none pb-20 md:pb-0">
+      <main id="main" tabIndex={-1} className={`flex-1 outline-none ${user ? 'pb-20 md:pb-0' : ''}`}>
         <Outlet />
       </main>
 
-      <footer className="no-print border-t border-soft bg-surface mt-16">
+      <footer className="no-print mt-16 border-t border-soft bg-surface">
         <div className="mx-auto max-w-7xl px-4 md:px-6 py-10 grid gap-8 md:grid-cols-4">
           <div className="md:col-span-2">
             <Logo />
@@ -121,20 +126,20 @@ export default function Layout() {
       </footer>
 
       {user && (
-        <nav aria-label="Learner" className="no-print md:hidden fixed bottom-0 inset-x-0 z-30 bg-surface border-t border-soft grid grid-cols-3">
+        <nav aria-label="Learner" className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-soft bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
           {[
             { to: '/dashboard', label: 'My learning', Icon: LayoutDashboard },
             { to: '/courses', label: 'Courses', Icon: BookOpen },
             { to: '/certificates', label: 'Certificates', Icon: Award },
           ].map(({ to, label, Icon }) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `flex flex-col items-center justify-center gap-0.5 min-h-14 text-xs font-semibold ${isActive ? 'text-link' : 'text-fg2'}`}>
+            <NavLink key={to} to={to} className={({ isActive }) => `pressable flex min-h-14 flex-col items-center justify-center gap-0.5 border-t-2 text-xs font-semibold ${isActive ? 'border-brand text-link' : 'border-transparent text-fg2'}`}>
               <Icon size={20} aria-hidden="true" />{label}
             </NavLink>
           ))}
         </nav>
       )}
 
-      <Assistant />
+      {assistantLoaded && <Suspense fallback={null}><Assistant initiallyOpen /></Suspense>}
     </div>
   )
 }

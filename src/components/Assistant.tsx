@@ -11,11 +11,10 @@ const WELCOME: Msg = {
   role: 'bot',
   text: 'Hi, I am the UKM learning assistant. Ask me about courses, fees, enrolment or your progress, or ask me to help you find a course.',
 }
-
-export default function Assistant() {
+export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
   const { user, progress } = useApp()
   const loc = useLocation()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(initiallyOpen)
   const [msgs, setMsgs] = useState<Msg[]>([WELCOME])
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -62,7 +61,7 @@ export default function Assistant() {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`no-print fixed z-40 right-4 bottom-20 md:bottom-6 min-h-12 px-4 rounded-full bg-brand text-on-brand font-semibold shadow-lg flex items-center gap-2 hover:bg-brand-hover ${open ? 'hidden' : ''}`}
+        className={`pressable no-print fixed right-4 z-40 flex min-h-12 items-center gap-2 rounded-md bg-brand px-4 font-semibold text-on-brand shadow-soft hover:bg-brand-hover ${user ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))]' : 'bottom-4'} md:bottom-6 ${open ? 'hidden' : ''}`}
       >
         <Bot size={20} aria-hidden="true" /> Ask the assistant
       </button>
@@ -72,20 +71,20 @@ export default function Assistant() {
           role="dialog"
           aria-label="UKM learning assistant"
           onKeyDown={(e) => { if (e.key === 'Escape') close() }}
-          className="no-print fixed z-50 inset-x-0 bottom-0 md:inset-x-auto md:right-6 md:bottom-6 md:w-[400px] h-[78vh] md:h-[600px] md:max-h-[80vh] flex flex-col bg-surface border border-line rounded-t-2xl md:rounded-2xl shadow-2xl"
+          className="no-print fixed inset-x-0 bottom-0 z-50 flex h-[min(78dvh,44rem)] flex-col rounded-t-[var(--radius-card)] border border-line bg-surface shadow-lift md:inset-x-auto md:bottom-6 md:right-6 md:h-[600px] md:max-h-[80vh] md:w-[400px] md:rounded-[var(--radius-card)]"
         >
           <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-soft">
             <div>
               <h2 className="font-bold text-base leading-5">Learning assistant</h2>
               <p className="text-xs text-muted">Demo assistant: scripted responses, not a live AI service</p>
             </div>
-            <button onClick={close} aria-label="Close assistant" className="size-11 grid place-items-center rounded-lg hover:bg-subtle"><X size={20} aria-hidden="true" /></button>
+            <button onClick={close} aria-label="Close assistant" className="pressable grid size-11 place-items-center rounded-md hover:bg-subtle"><X size={20} aria-hidden="true" /></button>
           </header>
 
           <div ref={log} role="log" aria-live="polite" aria-label="Conversation" className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {msgs.map((m, i) => (
-              <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
-                <div className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 whitespace-pre-line ${m.role === 'user' ? 'bg-brand text-on-brand' : 'bg-subtle text-fg'}`}>
+                <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3.5 py-2.5 ${m.role === 'user' ? 'bg-brand text-on-brand' : 'bg-subtle text-fg'}`}>
                   <span className="sr-only">{m.role === 'user' ? 'You said: ' : 'Assistant said: '}</span>
                   {m.text}
                   {m.reply?.links && (
@@ -122,5 +121,3 @@ export default function Assistant() {
     </>
   )
 }
-
-export const openAssistant = () => window.dispatchEvent(new Event('ukm:assistant'))
