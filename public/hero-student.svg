@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" role="img" aria-label="Smiling student holding folders">
+  <defs>
+    <linearGradient id="jacket" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C99A70"/><stop offset="1" stop-color="#A9744D"/></linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3626"/><stop offset="1" stop-color="#2E1A12"/></linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E2A982"/><stop offset="1" stop-color="#CC906A"/></linearGradient>
+  </defs>
+  <!-- backpack straps -->
+  <path d="M70 330 L40 540 L120 540 L130 340Z" fill="#2A2A30"/>
+  <path d="M330 330 L360 540 L280 540 L270 340Z" fill="#2A2A30"/>
+  <!-- hair (back) -->
+  <path d="M200 62 C118 60 88 128 94 206 C98 262 72 304 84 368 C102 416 150 392 162 346 L238 346 C250 392 298 416 316 368 C328 304 302 262 306 206 C312 128 282 60 200 62Z" fill="url(#hair)"/>
+  <!-- body / jacket -->
+  <path d="M20 540 L32 410 C42 346 100 304 160 292 L240 292 C300 304 358 346 368 410 L380 540Z" fill="url(#jacket)"/>
+  <!-- shirt -->
+  <path d="M158 292 L242 292 L232 450 L168 450Z" fill="#9DB9D2"/>
+  <path d="M170 292 L200 340 L230 292" fill="none" stroke="#7F9DB8" stroke-width="3" stroke-linejoin="round"/>
+  <!-- neck -->
+  <path d="M174 236 L226 236 L232 296 L200 332 L168 296Z" fill="url(#skin)"/>
+  <!-- face -->
+  <ellipse cx="200" cy="168" rx="64" ry="80" fill="url(#skin)"/>
+  <!-- ears hidden by hair; fringe -->
+  <path d="M134 150 C140 84 262 78 268 152 C250 118 204 106 134 150Z" fill="url(#hair)"/>
+  <path d="M134 150 C128 190 130 214 138 236 C128 200 126 170 134 150Z" fill="#3A2216"/>
+  <path d="M266 150 C274 190 272 214 262 236 C272 200 274 170 266 150Z" fill="#3A2216"/>
+  <!-- brows, eyes, nose, smile -->
+  <path d="M158 148 Q174 138 188 146" stroke="#3A2216" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M212 146 Q226 138 242 148" stroke="#3A2216" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="173" cy="166" rx="8" ry="6.5" fill="#fff"/><circle cx="173" cy="166" r="4.6" fill="#2A1A12"/>
+  <ellipse cx="227" cy="166" rx="8" ry="6.5" fill="#fff"/><circle cx="227" cy="166" r="4.6" fill="#2A1A12"/>
+  <path d="M200 172 Q194 192 202 198" stroke="#B87A55" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M164 208 Q200 244 238 208 Q200 220 164 208Z" fill="#fff" stroke="#B86B5A" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="156" cy="196" rx="12" ry="7" fill="#E58E80" opacity=".35"/><ellipse cx="244" cy="196" rx="12" ry="7" fill="#E58E80" opacity=".35"/>
+  <!-- folders -->
+  <g transform="rotate(-8 190 440)">
+    <rect x="92" y="372" width="214" height="168" rx="8" fill="#B5694A"/>
+    <rect x="86" y="364" width="214" height="168" rx="8" fill="#F2F2F2"/>
+    <rect x="76" y="360" width="214" height="176" rx="8" fill="#F0A91C"/>
+    <rect x="76" y="360" width="214" height="22" rx="8" fill="#E39A10"/>
+  </g>
+  <!-- hands -->
+  <ellipse cx="316" cy="434" rx="22" ry="30" fill="url(#skin)" transform="rotate(18 316 434)"/>
+  <rect x="300" y="396" width="14" height="46" rx="7" fill="url(#skin)" transform="rotate(12 307 419)"/>
+  <ellipse cx="76" cy="470" rx="20" ry="28" fill="url(#skin)" transform="rotate(-16 76 470)"/>
+  <!-- jacket sleeves over wrists -->
+  <path d="M28 420 L100 440 L84 520 L24 540Z" fill="#B88258"/>
+  <path d="M372 420 L330 440 L348 520 L378 540Z" fill="#B88258"/>
+</svg>
