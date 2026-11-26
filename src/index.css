@@ -16,6 +16,8 @@
   --link: #0B7A5B; --selected: #ECFDF5; --mint: #D1FAE5; --accent: #22C55E;
   --warn-bg: #FEF3C7; --warn-fg: #78350F; --danger: #B91C1C; --danger-bg: #FEE2E2;
   /* Hero + nav palette (purple backdrop, lavender accent, yellow stats strip) */
+  --ft-panel: #F5F5F7;
+  --fq-bg: #F7F7FB; --fq-card: #FFFFFF; --fq-plus: #6D3BF0;
   --hx-from: #DCCDF1; --hx-to: #9A6BDC; --hx-card: #F7F7F7; --hx-ink: #0A0A0A; --hx-muted: #5B5B63;
   --hx-accent: #B8A4F8; --hx-on-accent: #0A0A0A; --hx-strip: #FCE9A6; --hx-disc: #B19CFB;
   --hx-glass-from: #8E85A6; --hx-glass-to: #B7ABDB;
@@ -31,6 +33,8 @@
   --primary: #0B7A5B; --primary-hover: #099268; --on-primary: #FFFFFF;
   --link: #34D399; --selected: #123B32; --mint: #123B32; --accent: #22C55E;
   --warn-bg: #422006; --warn-fg: #FDE68A; --danger: #FCA5A5; --danger-bg: #450A0A;
+  --ft-panel: #1C1C25;
+  --fq-bg: #0F0F16; --fq-card: #171720; --fq-plus: #A78BFA;
   --hx-from: #1B1530; --hx-to: #4A2F8A; --hx-card: #14121F; --hx-ink: #F5F3FF; --hx-muted: #B4B0C6;
   --hx-accent: #A692F7; --hx-on-accent: #0A0A0A; --hx-strip: #3A3216; --hx-disc: #6B55C9;
   --hx-glass-from: #4A4468; --hx-glass-to: #6D62A0;

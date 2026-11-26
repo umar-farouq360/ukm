@@ -1,25 +1,22 @@
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import Categories from "../components/Categories";
-import PopularCourses from "../components/PopularCourses";
-import HowItWorks from "../components/HowItWorks";
-import Features from "../components/Features";
-import AssistantCTA from "../components/AssistantCTA";
-import CTA from "../components/CTA";
 import About from "../components/About";
+import Testimonials from "../components/Testimonials";
+import FAQs from "../components/FAQs";
+import Benefits from "../components/Benefits";
 
 export default function Home() {
   return (
     <>
-      <Header embedded />
+      <Header />
       <Hero />
       <About />
+      <Benefits />
+      {/* <HowItWorks /> */}
       <Categories />
-      {/* <PopularCourses /> */}
-      <HowItWorks />
-      <Features />
-      <AssistantCTA />
-      {/* <CTA /> */}
+      <Testimonials />
+      <FAQs />
     </>
   );
 }

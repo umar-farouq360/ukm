@@ -1,8 +1,8 @@
 import { aboutDetails } from "../data/about";
-import { H2, Icon, Label, Wrap } from "./ui";
+import { H2, Label, Wrap } from "./ui";
 
 const About: React.FC = () => {
-  const { label, heading, bullets, paragraphs, features } = aboutDetails;
+  const { label, heading, bullets, paragraphs } = aboutDetails;
 
   return (
     <section
@@ -20,7 +20,6 @@ const About: React.FC = () => {
             </span>
           ))}
         </H2>
-
         <div className="mt-11 grid gap-[clamp(24px,6vw,90px)] md:grid-cols-2">
           <ul className="max-w-[340px]">
             {bullets.map((b) => (
@@ -37,23 +36,6 @@ const About: React.FC = () => {
               <p key={p}>{p}</p>
             ))}
           </div>
-        </div>
-
-        <div className="mt-24 md:mt-52 grid gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="lg:border-l lg:border-line lg:px-[22px] lg:first:border-0 lg:first:pl-0"
-            >
-              <i className="mb-4 grid size-11 place-items-center rounded-full border border-line lg:mb-14">
-                <Icon name={f.icon} />
-              </i>
-              <h3 className="font-display text-[1.35rem] font-bold tracking-[-.01em]">
-                {f.title}
-              </h3>
-              <p className="mt-1 text-[.82rem] text-muted">{f.description}</p>
-            </div>
-          ))}
         </div>
       </Wrap>
     </section>
