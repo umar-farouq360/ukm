@@ -1,9 +1,9 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Award, BookOpen, LayoutDashboard, LogOut, Menu, Moon, Sun, WifiOff, X } from 'lucide-react'
 import { CATEGORIES } from '../data'
 import { useApp } from '../store'
-import { btnGhost, btnPrimary, btnSecondary } from './ui'
+import { btnGhost, btnPrimary, btnSecondary, Spinner } from './ui'
 
 const Assistant = lazy(() => import('./Assistant'))
 
@@ -23,15 +23,42 @@ export default function Layout() {
   const { user, theme, toggleTheme, lowData, toggleLowData, signOut } = useApp()
   const [menu, setMenu] = useState(false)
   const [assistantLoaded, setAssistantLoaded] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const loadedRef = useRef(false)
+  const openOnLoad = useRef(false)
   const loc = useLocation()
   const nav = useNavigate()
 
   useEffect(() => { setMenu(false); window.scrollTo(0, 0) }, [loc.pathname])
+
+  // Header gains a soft shadow once content scrolls beneath it.
   useEffect(() => {
-    const activate = () => setAssistantLoaded(true)
-    window.addEventListener('ukm:assistant', activate)
-    return () => window.removeEventListener('ukm:assistant', activate)
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // The assistant chunk loads when the browser is idle so the launcher can ease in on every page.
+  // If someone opens it before then, it mounts already open.
+  useEffect(() => {
+    const load = () => { loadedRef.current = true; setAssistantLoaded(true) }
+    const activate = () => { if (!loadedRef.current) openOnLoad.current = true; load() }
+    window.addEventListener('ukm:assistant', activate)
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+    const handle = idle ? idle(load, { timeout: 2000 }) : window.setTimeout(load, 1200)
+    return () => {
+      window.removeEventListener('ukm:assistant', activate)
+      if (idle) (window as unknown as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(handle); else window.clearTimeout(handle)
+    }
+  }, [])
+
+  const switchTheme = () => {
+    const root = document.documentElement
+    root.classList.add('theme-fade')
+    toggleTheme()
+    window.setTimeout(() => root.classList.remove('theme-fade'), 450)
+  }
 
   const out = () => { signOut(); nav('/') }
   const links = (
@@ -47,7 +74,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <a href="#main" className="skip-link">Skip to main content</a>
 
-      <header className="no-print sticky top-0 z-30 border-b border-soft bg-surface/95 backdrop-blur-sm">
+      <header className={`no-print sticky top-0 z-30 border-b border-soft bg-surface/95 backdrop-blur-sm transition-shadow duration-300 ${scrolled ? 'shadow-soft' : ''}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 md:px-6">
           <Logo />
           <nav aria-label="Main" className="ml-4 hidden items-center gap-1 lg:flex">{links}</nav>
@@ -55,8 +82,8 @@ export default function Layout() {
             <button onClick={toggleLowData} aria-pressed={lowData} title="Low-data mode hides decorative visuals" className={`${btnGhost} px-3 ${lowData ? 'bg-selected text-link' : ''}`}>
               <WifiOff size={18} aria-hidden="true" /><span className="hidden sm:inline">Low-data {lowData ? 'on' : 'off'}</span><span className="sr-only sm:hidden">Low-data mode {lowData ? 'on' : 'off'}</span>
             </button>
-            <button onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} className={`${btnGhost} px-3`}>
-              {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+            <button onClick={switchTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} className={`${btnGhost} px-3`}>
+              <span key={theme} className="anim-icon-swap">{theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}</span>
             </button>
             <div className="hidden lg:flex items-center gap-2 ml-2">
               {user ? (
@@ -72,17 +99,17 @@ export default function Layout() {
               )}
             </div>
             <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-controls="mobile-menu" aria-label={menu ? 'Close menu' : 'Open menu'} className={`${btnGhost} px-3 lg:hidden`}>
-              {menu ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+              <span key={String(menu)} className="anim-icon-swap">{menu ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}</span>
             </button>
           </div>
         </div>
-        {menu && (
-          <div id="mobile-menu" className="lg:hidden border-t border-soft bg-surface px-4 py-3">
+        <div id="mobile-menu" data-open={menu} inert={!menu} className="collapse-y lg:hidden">
+          <div><div className="border-t border-soft bg-surface px-4 py-3">
             <nav aria-label="Mobile" className="flex flex-col gap-1">
               {links}
               <p className="text-xs font-semibold text-muted px-3 pt-3">Programmes</p>
               {CATEGORIES.map((c) => (
-                <Link key={c.id} to={`/courses?category=${c.id}`} className="px-3 min-h-11 inline-flex items-center rounded-lg text-sm text-fg2 hover:bg-subtle">{c.name}</Link>
+                <Link key={c.id} to={`/courses?category=${c.id}`} className="pressable px-3 min-h-11 inline-flex items-center rounded-lg text-sm text-fg2 hover:bg-subtle">{c.name}</Link>
               ))}
             </nav>
             <div className="flex gap-2 pt-3">
@@ -93,12 +120,14 @@ export default function Layout() {
                 </>
               )}
             </div>
-          </div>
-        )}
+          </div></div>
+        </div>
       </header>
 
       <main id="main" tabIndex={-1} className={`flex-1 outline-none ${user ? 'pb-20 md:pb-0' : ''}`}>
-        <Outlet />
+        <Suspense fallback={<div className="min-h-[60vh]"><Spinner /></div>}>
+          <div key={loc.pathname} className="page-enter"><Outlet /></div>
+        </Suspense>
       </main>
 
       <footer className="no-print mt-16 border-t border-soft bg-surface">
@@ -139,7 +168,7 @@ export default function Layout() {
         </nav>
       )}
 
-      {assistantLoaded && <Suspense fallback={null}><Assistant initiallyOpen /></Suspense>}
+      {assistantLoaded && <Suspense fallback={null}><Assistant initiallyOpen={openOnLoad.current} /></Suspense>}
     </div>
   )
 }

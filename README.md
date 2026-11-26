@@ -22,7 +22,7 @@ Demo learner state: one completed course with certificate, one in progress (CSC-
 | # | Official requirement | Where |
 |---|---|---|
 | 1 | Learning homepage | `/` (`src/pages/Home.tsx`) |
-| 2 | Course discovery, search and filtering | `/courses` (URL-synced filters) |
+| 2 | Course discovery, live search and filtering | `/courses` (results update as you type; URL-synced filters) |
 | 3 | Course details | `/courses/:id` |
 | 4 | Course enrolment | `/enrol/:id` (manual) plus allocated courses on registration/demo |
 | 5 | Learning dashboard | `/dashboard` |
@@ -39,7 +39,7 @@ All people, courses, fees and certificates are fictional.
 `src/data.ts` (catalogue, API-shaped), `src/store.tsx` (state in localStorage; the seam for a real API), `src/assistant.ts`, `src/components`, `src/pages`.
 
 ## Performance and accessibility checks performed so far
-- First-load JavaScript: about 105 KB gzipped (331 KB raw), CSS 6.5 KB gzipped, one 27 KB font. Other routes are lazy chunks of 0.3 to 9 KB. No images, no third-party scripts.
+- First-load JavaScript: about 105 KB gzipped (331 KB raw), CSS about 11 KB gzipped, one 27 KB font. Other routes are lazy chunks of 0.3 to 10 KB. Images: 16 WebP files (course illustrations 5 to 14 KB each, hero 10 KB), lazy-loaded below the fold and skipped in low-data mode. No third-party scripts.
 - Colour contrast: `node scripts/contrast.mjs` checks the real token pairs in both themes. All pairs meet AA (4.5:1 text, 3:1 controls). `#22C55E` (2.28:1 on white) is never used for text.
 - Type-check and production build pass.
 - **Not yet done:** manual keyboard and screen-reader pass, screenshots at 360/430/768/1024/1280/1440, throttled-network test, Lighthouse run. These must be completed in a real browser before submission.
@@ -51,3 +51,10 @@ All people, courses, fees and certificates are fictional.
 
 ## AI-assistance disclosure
 This build was generated with AI assistance (Claude): the code scaffold, sample copy and sample data. Design decisions (four programme categories, green academic identity, text-first learning, low-data mode, allocation plus manual enrolment) come from the team's brief. The team must be able to explain every major choice.
+
+## Motion and colour (UI layer only)
+- Motion uses opacity and transform only, honours `prefers-reduced-motion`, and never moves layout: page and route fades, staggered hero, scroll reveals, animated menus and filter panels (no display toggling), cross-faded theme switch, FLIP-smoothed result lists.
+- Assistant launcher eases in after idle, pulses three times, then rests; the panel scales in and out and replies fade in.
+- Course cards: lift, category-coloured accent bar, image zoom, title underline and arrow nudge on hover or keyboard focus.
+- Two added hues complete a four-hue category set (green undergraduate, violet masters, azure postgraduate, amber certificate). Violet is the triad partner of green and amber; azure is the complement of amber and analogous to green. Hue always accompanies a text label and icon, and the primary action stays green.
+- Course illustrations are generated WebP files in `public/images/courses/<course-id>.webp`.

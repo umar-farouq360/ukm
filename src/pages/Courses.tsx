@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { CATEGORIES, COURSES, SUBJECTS, instructorById, type Course } from '../data'
 import { CourseCard, PageTitle, btnSecondary, card, inputCls } from '../components/ui'
+import { useFlip } from '../hooks/useFlip'
+import { delay } from '../lib/motion'
 
 const DURATIONS = [
   { id: 'short', label: 'Up to 4 weeks', test: (w: number) => w <= 4 },
@@ -37,14 +39,28 @@ export default function Courses() {
 
   const get = (k: string) => sp.get(k) ?? ''
   const set = (k: string, v: string) => {
-    const next = new URLSearchParams(sp)
-    if (v) next.set(k, v); else next.delete(k)
-    if (k === 'category' && v !== 'undergraduate') next.delete('level')
-    setSp(next, { replace: true })
+    setSp((prev) => {
+      const next = new URLSearchParams(prev)
+      if (v) next.set(k, v); else next.delete(k)
+      if (k === 'category' && v !== 'undergraduate') next.delete('level')
+      return next
+    }, { replace: true })
   }
-  const q = get('q'), category = get('category'), subject = get('subject'), level = get('level'), duration = get('duration'), difficulty = get('difficulty'), price = get('price'), sort = get('sort')
-  const [draft, setDraft] = useState(q)
-  useEffect(() => setDraft(q), [q])
+  const urlQ = get('q'), category = get('category'), subject = get('subject'), level = get('level'), duration = get('duration'), difficulty = get('difficulty'), price = get('price'), sort = get('sort')
+
+  // Live search: results follow every keystroke; the URL catches up shortly after, so links stay shareable.
+  const [draft, setDraft] = useState(urlQ)
+  const q = draft.trim()
+  const committed = useRef(urlQ)
+  useEffect(() => { if (urlQ !== committed.current) { committed.current = urlQ; setDraft(urlQ) } }, [urlQ])
+  useEffect(() => {
+    if (q === committed.current) return
+    const t = window.setTimeout(() => { committed.current = q; set('q', q) }, 250)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q])
+  const searchRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
   const results = useMemo(() => {
     const dur = DURATIONS.find((d) => d.id === duration)
@@ -60,8 +76,10 @@ export default function Courses() {
     return sorted
   }, [q, category, subject, level, duration, difficulty, price, sort])
 
+  useFlip(listRef, [results.map((c) => c.id).join('|'), loading])
+
   const active = [q, category, subject, level, duration, difficulty, price].filter(Boolean).length
-  const clear = () => setSp(new URLSearchParams(), { replace: true })
+  const clear = () => { setDraft(''); setSp(new URLSearchParams(), { replace: true }) }
   const catName = CATEGORIES.find((c) => c.id === category)
 
   const filters = (
@@ -81,23 +99,48 @@ export default function Courses() {
       <PageTitle title={catName ? catName.name : 'Course discovery'}>{catName ? catName.name : 'Find a course'}</PageTitle>
       <p className="text-fg2 mt-1">{catName ? catName.description : 'Search the catalogue or narrow it down with filters.'}</p>
 
-      <form role="search" onSubmit={(e) => { e.preventDefault(); set('q', draft.trim()) }} className="mt-6 flex max-w-3xl gap-2">
-        <label htmlFor="q" className="sr-only">Search by course name, code, subject or instructor</label>
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input id="q" type="search" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Course name, code, subject or instructor" className={`${inputCls} pl-10`} />
+      <form role="search" onSubmit={(e) => { e.preventDefault(); set('q', q) }} className="mt-6 max-w-3xl">
+        <label htmlFor="q" className="sr-only">Search by course name, code, subject or instructor. Results update as you type.</label>
+        <div className="group relative">
+          <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted transition-colors duration-200 group-focus-within:text-link" aria-hidden="true" />
+          <input
+            ref={searchRef}
+            id="q"
+            type="search"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape' && draft) { e.preventDefault(); setDraft('') } }}
+            placeholder="Start typing a course name, code, subject or instructor"
+            autoComplete="off"
+            className={`${inputCls} live-search min-h-12 pl-11 pr-12`}
+          />
+          <button
+            type="button"
+            onClick={() => { setDraft(''); searchRef.current?.focus() }}
+            tabIndex={draft ? 0 : -1}
+            aria-hidden={!draft}
+            aria-label="Clear search"
+            className={`pressable absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-md text-muted hover:bg-subtle hover:text-fg ${draft ? 'scale-100 opacity-100' : 'pointer-events-none scale-50 opacity-0'}`}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
         </div>
-        <button className="inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-brand text-on-brand font-semibold hover:bg-brand-hover">Search</button>
       </form>
 
       <div className="mt-7 grid items-start gap-6 lg:grid-cols-[250px_1fr]">
         <aside aria-label="Filters" className="lg:sticky lg:top-20">
           <button onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen} aria-controls="filters" className={`${btnSecondary} w-full justify-between lg:hidden`}>
-            <span className="inline-flex items-center gap-2"><SlidersHorizontal size={16} aria-hidden="true" />Filters{active ? ` (${active})` : ''}</span><span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+            <span className="inline-flex items-center gap-2"><SlidersHorizontal size={16} aria-hidden="true" />Filters{active ? ` (${active})` : ''}</span><span aria-hidden="true" className={`inline-block text-lg leading-none transition-transform duration-300 ease-out ${filtersOpen ? 'rotate-45' : ''}`}>+</span>
           </button>
-          <div id="filters" className={`${card} mt-3 p-4 lg:mt-0 ${filtersOpen ? '' : 'hidden'} lg:block`}>
-            <h2 className="mb-4 hidden font-display text-xl font-medium lg:block">Narrow results</h2>
-            {filters}
+          <div id="filters" data-open={filtersOpen} className="collapse-y lg-open">
+            <div>
+              <div className="pt-3 lg:pt-0">
+                <div className={`${card} p-4`}>
+                  <h2 className="mb-4 hidden font-display text-xl font-medium lg:block">Narrow results</h2>
+                  {filters}
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
 
@@ -123,24 +166,24 @@ export default function Courses() {
             <div className="mb-4 flex flex-wrap items-center gap-2" aria-label="Applied filters">
               {[q && ['q', `Search: ${q}`], category && ['category', CATEGORIES.find((c) => c.id === category)?.short ?? category], subject && ['subject', subject], level && ['level', level], duration && ['duration', DURATIONS.find((d) => d.id === duration)?.label ?? duration], difficulty && ['difficulty', difficulty], price && ['price', price === 'free' ? 'Free' : 'Paid']]
                 .filter((item): item is [string, string] => Boolean(item))
-                .map(([key, label]) => <button key={key} onClick={() => set(key, '')} className="pressable inline-flex min-h-9 items-center gap-2 rounded-md border border-control px-2.5 text-xs font-semibold text-fg hover:bg-subtle">{label}<X size={13} aria-hidden="true" /><span className="sr-only">Remove filter</span></button>)}
+                .map(([key, label]) => <button key={key} onClick={() => key === 'q' ? setDraft('') : set(key, '')} className="anim-pop pressable inline-flex min-h-9 items-center gap-2 rounded-md border border-control px-2.5 text-xs font-semibold text-fg hover:bg-subtle">{label}<X size={13} aria-hidden="true" /><span className="sr-only">Remove filter</span></button>)}
               <button onClick={clear} className="min-h-9 px-2 text-xs font-semibold text-link underline underline-offset-2">Clear all</button>
             </div>
           )}
 
           {loading ? (
             <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
-              {[0, 1, 2].map((i) => <li key={i} className={`${card} h-72 animate-pulse bg-subtle`} />)}
+              {[0, 1, 2].map((i) => <li key={i} className={`${card} anim-pop h-72 animate-pulse bg-subtle`} style={delay(i * 70)} />)}
             </ul>
           ) : results.length === 0 ? (
-            <div className={`${card} p-8 text-center`}>
+            <div className={`${card} anim-pop p-8 text-center`}>
               <h2 className="text-xl font-semibold">No courses match your search</h2>
               <p className="text-fg2 mt-1">Try a different word, or remove some filters.</p>
               <button onClick={clear} className={`${btnSecondary} mt-4`}>Clear search and filters</button>
             </div>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {results.map((c) => <li key={c.id} className="relative"><CourseCard course={c} /></li>)}
+            <ul ref={listRef} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {results.map((c, i) => <li key={c.id} data-flip={c.id} className="anim-rise relative" style={delay(Math.min(i, 8) * 45)}><CourseCard course={c} query={q} /></li>)}
             </ul>
           )}
         </section>

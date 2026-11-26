@@ -74,8 +74,8 @@ export default function Learn() {
                   const current = l.id === lesson.id
                   return (
                     <li key={l.id}>
-                      <Link to={`/learn/${course.id}/${l.id}`} aria-current={current ? 'page' : undefined} className={`flex items-start gap-2 rounded-lg px-2 py-2.5 min-h-11 text-sm ${current ? 'bg-selected font-semibold text-link' : 'hover:bg-subtle'}`}>
-                        {isDone ? <Check size={16} className="mt-0.5 shrink-0 text-link" aria-hidden="true" /> : <Circle size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />}
+                      <Link to={`/learn/${course.id}/${l.id}`} aria-current={current ? 'page' : undefined} className={`pressable flex items-start gap-2 rounded-lg px-2 py-2.5 min-h-11 text-sm ${current ? 'bg-selected font-semibold text-link' : 'hover:bg-subtle hover:translate-x-0.5'}`}>
+                        {isDone ? <Check size={16} className="anim-pop mt-0.5 shrink-0 text-link" aria-hidden="true" /> : <Circle size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />}
                         <span className="flex-1">{l.title}<span className="sr-only">{isDone ? ' (complete)' : ' (not complete)'}, {LABEL[l.type]}</span></span>
                         <LIcon size={14} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
                       </Link>
@@ -103,12 +103,18 @@ export default function Learn() {
       <div className="grid items-start gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12">
         <aside className="lg:sticky lg:top-20">
           <button onClick={() => setNavOpen((o) => !o)} aria-expanded={navOpen} aria-controls="contents" className={`${btnSecondary} w-full lg:hidden justify-between`}>
-            <span className="inline-flex items-center gap-2"><ListTree size={16} aria-hidden="true" />Course contents</span><ChevronDown size={16} aria-hidden="true" />
+            <span className="inline-flex items-center gap-2"><ListTree size={16} aria-hidden="true" />Course contents</span><ChevronDown size={16} className={`transition-transform duration-300 ease-out ${navOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
-          <div id="contents" className={`${card} mt-3 max-h-[min(65dvh,38rem)] overflow-y-auto bg-subtle p-4 lg:mt-0 lg:max-h-[calc(100dvh-7rem)] ${navOpen ? '' : 'hidden'} lg:block`}>{contents}</div>
+          <div id="contents" data-open={navOpen} className="collapse-y lg-open">
+            <div>
+              <div className="pt-3 lg:pt-0">
+                <div className={`${card} max-h-[min(65dvh,38rem)] overflow-y-auto bg-subtle p-4 lg:max-h-[calc(100dvh-7rem)]`}>{contents}</div>
+              </div>
+            </div>
+          </div>
         </aside>
 
-        <article className="min-w-0 max-w-4xl" aria-labelledby="lesson-title">
+        <article key={lesson.id} className="page-enter min-w-0 max-w-4xl" aria-labelledby="lesson-title">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
             <Badge tone="brand"><Icon size={12} aria-hidden="true" />{LABEL[lesson.type]}</Badge>
             <span>Module: {mod.title}</span><span>· Lesson {idx + 1} of {lessons.length} · about {lesson.minutes} min</span>
@@ -118,12 +124,12 @@ export default function Learn() {
           {lesson.type === 'video' && (
             <div className="mt-5">
               {showVideo ? (
-                <div role="region" aria-label="Video player placeholder" className="grid aspect-video place-items-center rounded-lg border border-soft bg-subtle p-4 text-center">
+                <div role="region" aria-label="Video player placeholder" className="anim-pop grid aspect-video place-items-center rounded-lg border border-soft bg-subtle p-4 text-center">
                   <p className="text-fg2 max-w-sm">Demo: no video file is included in this prototype, so nothing was downloaded. A real course would stream the video here only after you pressed play.</p>
                 </div>
               ) : (
-                <button onClick={() => setShowVideo(true)} className="pressable grid aspect-video w-full place-items-center rounded-lg border border-soft bg-subtle hover:bg-selected">
-                  <span className="flex flex-col items-center gap-2 font-semibold"><PlayCircle size={44} className="text-link" aria-hidden="true" />Play video (loads only when you press play)</span>
+                <button onClick={() => setShowVideo(true)} className="pressable group grid aspect-video w-full place-items-center rounded-lg border border-soft bg-subtle hover:bg-selected">
+                  <span className="flex flex-col items-center gap-2 font-semibold"><PlayCircle size={44} className="text-link transition-transform duration-300 ease-out group-hover:scale-110" aria-hidden="true" />Play video (loads only when you press play)</span>
                 </button>
               )}
             </div>
@@ -151,7 +157,7 @@ export default function Learn() {
           <div className="mt-10 flex flex-col gap-4 border-t border-soft pt-5">
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={toggle} aria-pressed={done} className={done ? btnSecondary : btnPrimary}>
-                <Check size={16} aria-hidden="true" />{done ? 'Completed (press to undo)' : 'Mark as complete'}
+                <span key={String(done)} className="anim-pop inline-grid"><Check size={16} aria-hidden="true" /></span>{done ? 'Completed (press to undo)' : 'Mark as complete'}
               </button>
               <p role="status" aria-live="polite" className="text-sm font-semibold text-link">{announce}</p>
             </div>

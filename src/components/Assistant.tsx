@@ -4,6 +4,7 @@ import { Bot, Send, X } from 'lucide-react'
 import { answer, SUGGESTIONS, type Reply } from '../assistant'
 import { useApp } from '../store'
 import { inputCls } from './ui'
+import { delay, prefersReducedMotion } from '../lib/motion'
 
 interface Msg { role: 'user' | 'bot'; text: string; reply?: Reply }
 
@@ -15,6 +16,10 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
   const { user, progress } = useApp()
   const loc = useLocation()
   const [open, setOpen] = useState(initiallyOpen)
+  const [render, setRender] = useState(initiallyOpen) // keeps the panel mounted while it animates out
+  const [show, setShow] = useState(false) // launcher eases in after the page settles
+  const [pulse, setPulse] = useState(false)
+  const wasOpen = useRef(initiallyOpen)
   const [msgs, setMsgs] = useState<Msg[]>([WELCOME])
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -29,10 +34,33 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
     return () => window.removeEventListener('ukm:assistant', h)
   }, [])
 
-  useEffect(() => { if (open) input.current?.focus() }, [open])
-  useEffect(() => { log.current?.scrollTo({ top: log.current.scrollHeight }) }, [msgs, busy])
+  // Launcher: fade and spring in shortly after mount, pulse a few times, then rest.
+  useEffect(() => {
+    const t1 = window.setTimeout(() => { setShow(true); setPulse(true) }, 700)
+    const t2 = window.setTimeout(() => setPulse(false), 700 + 5600)
+    return () => { window.clearTimeout(t1); window.clearTimeout(t2) }
+  }, [])
 
-  const close = () => { setOpen(false); trigger.current?.focus() }
+  useEffect(() => { if (open) setRender(true) }, [open])
+  useEffect(() => { if (open && render) input.current?.focus({ preventScroll: true }) }, [open, render])
+  useEffect(() => {
+    if (!open && wasOpen.current) trigger.current?.focus({ preventScroll: true })
+    wasOpen.current = open
+  }, [open])
+  useEffect(() => {
+    const el = log.current
+    el?.scrollTo({ top: el.scrollHeight, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+  }, [msgs, busy])
+
+  const close = () => setOpen(false)
+
+  // Escape closes the panel from anywhere, even after the focused suggestion button has gone.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open])
 
   const currentCourseId = loc.pathname.startsWith('/learn/') ? loc.pathname.split('/')[2] : undefined
 
@@ -42,6 +70,7 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
     setMsgs((m) => [...m, { role: 'user', text: t }])
     setText('')
     setBusy(true)
+    input.current?.focus({ preventScroll: true })
     // Short artificial delay so the loading state is visible and the reply is announced after it.
     window.setTimeout(() => {
       try {
@@ -61,36 +90,41 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`pressable no-print fixed right-4 z-40 flex min-h-12 items-center gap-2 rounded-md bg-brand px-4 font-semibold text-on-brand shadow-soft hover:bg-brand-hover ${user ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))]' : 'bottom-4'} md:bottom-6 ${open ? 'hidden' : ''}`}
+        data-show={show && !open}
+        data-pulse={pulse}
+        inert={!show || open}
+        className={`fab no-print fixed right-4 z-40 flex min-h-12 items-center gap-2 rounded-md bg-brand px-4 font-semibold text-on-brand shadow-soft hover:bg-brand-hover ${user ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))]' : 'bottom-4'} md:bottom-6`}
       >
-        <Bot size={20} aria-hidden="true" /> Ask the assistant
+        <Bot size={20} aria-hidden="true" className="fab-icon" /> Ask the assistant
       </button>
 
-      {open && (
+      {render && (
         <section
           role="dialog"
           aria-label="UKM learning assistant"
+          data-state={open ? 'open' : 'closing'}
+          onAnimationEnd={(e) => { if (e.target === e.currentTarget && !open) setRender(false) }}
           onKeyDown={(e) => { if (e.key === 'Escape') close() }}
-          className="no-print fixed inset-x-0 bottom-0 z-50 flex h-[min(78dvh,44rem)] flex-col rounded-t-[var(--radius-card)] border border-line bg-surface shadow-lift md:inset-x-auto md:bottom-6 md:right-6 md:h-[600px] md:max-h-[80vh] md:w-[400px] md:rounded-[var(--radius-card)]"
+          className="assistant-panel no-print fixed inset-x-0 bottom-0 z-50 flex h-[min(78dvh,44rem)] flex-col rounded-t-[var(--radius-card)] border border-line bg-surface shadow-lift md:inset-x-auto md:bottom-6 md:right-6 md:h-[600px] md:max-h-[80vh] md:w-[400px] md:rounded-[var(--radius-card)]"
         >
           <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-soft">
             <div>
               <h2 className="font-bold text-base leading-5">Learning assistant</h2>
               <p className="text-xs text-muted">Demo assistant: scripted responses, not a live AI service</p>
             </div>
-            <button onClick={close} aria-label="Close assistant" className="pressable grid size-11 place-items-center rounded-md hover:bg-subtle"><X size={20} aria-hidden="true" /></button>
+            <button onClick={close} aria-label="Close assistant" className="pressable group grid size-11 place-items-center rounded-md hover:bg-subtle"><X size={20} aria-hidden="true" className="transition-transform duration-300 ease-out group-hover:rotate-90" /></button>
           </header>
 
           <div ref={log} role="log" aria-live="polite" aria-label="Conversation" className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {msgs.map((m, i) => (
-                <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div key={i} className={`anim-msg ${m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}>
                 <div className={`max-w-[88%] whitespace-pre-line rounded-lg px-3.5 py-2.5 ${m.role === 'user' ? 'bg-brand text-on-brand' : 'bg-subtle text-fg'}`}>
                   <span className="sr-only">{m.role === 'user' ? 'You said: ' : 'Assistant said: '}</span>
                   {m.text}
                   {m.reply?.links && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {m.reply.links.map((l) => (
-                        <Link key={l.to + l.label} to={l.to} onClick={() => setOpen(false)} className="rounded-full border border-line bg-surface text-link px-3 py-1.5 text-xs font-semibold hover:bg-selected">{l.label}</Link>
+                        <Link key={l.to + l.label} to={l.to} onClick={() => setOpen(false)} className="pressable rounded-full border border-line bg-surface text-link px-3 py-1.5 text-xs font-semibold hover:bg-selected">{l.label}</Link>
                       ))}
                     </div>
                   )}
@@ -98,13 +132,18 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
                 </div>
               </div>
             ))}
-            {busy && <p role="status" className="text-xs text-muted px-1">Assistant is typing…</p>}
+            {busy && (
+              <div role="status" className="anim-msg flex w-fit items-center gap-1 rounded-lg bg-subtle px-3.5 py-3 text-muted">
+                <span className="sr-only">Assistant is typing…</span>
+                <span className="dot size-1.5 rounded-full bg-current" aria-hidden="true" /><span className="dot size-1.5 rounded-full bg-current" aria-hidden="true" /><span className="dot size-1.5 rounded-full bg-current" aria-hidden="true" />
+              </div>
+            )}
             {msgs.length === 1 && (
               <div className="pt-1">
                 <p className="text-xs font-semibold text-fg2 mb-2">Try asking</p>
                 <ul className="flex flex-col gap-2">
-                  {SUGGESTIONS.map((s) => (
-                    <li key={s}><button onClick={() => send(s)} className="w-full text-left rounded-xl border border-control px-3 py-2.5 text-sm hover:bg-selected min-h-11">{s}</button></li>
+                  {SUGGESTIONS.map((s, i) => (
+                    <li key={s} className="anim-rise" style={delay(180 + i * 80)}><button onClick={() => send(s)} className="pressable w-full text-left rounded-xl border border-control px-3 py-2.5 text-sm hover:border-brand hover:bg-selected min-h-11">{s}</button></li>
                   ))}
                 </ul>
               </div>
@@ -114,7 +153,7 @@ export default function Assistant({ initiallyOpen = false }: { initiallyOpen?: b
           <form onSubmit={(e) => { e.preventDefault(); send(text) }} className="flex gap-2 p-3 border-t border-soft">
             <label htmlFor="assistant-input" className="sr-only">Message the assistant</label>
             <input id="assistant-input" ref={input} value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask about courses, fees, progress…" className={inputCls} autoComplete="off" />
-            <button type="submit" disabled={!text.trim() || busy} aria-label="Send message" className="size-11 shrink-0 grid place-items-center rounded-lg bg-brand text-on-brand hover:bg-brand-hover disabled:opacity-60"><Send size={18} aria-hidden="true" /></button>
+            <button type="submit" disabled={!text.trim() || busy} aria-label="Send message" className="pressable group size-11 shrink-0 grid place-items-center rounded-lg bg-brand text-on-brand hover:bg-brand-hover disabled:opacity-60"><Send size={18} aria-hidden="true" className="transition-transform duration-300 ease-out group-enabled:group-hover:translate-x-0.5 group-enabled:group-hover:-translate-y-0.5" /></button>
           </form>
         </section>
       )}

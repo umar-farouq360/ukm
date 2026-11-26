@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { BarChart3, CheckCircle2, ChevronRight, Clock, FileText, PlayCircle, Pencil } from 'lucide-react'
 import { allLessons, categoryById, courseById, instructorById, naira, type LessonType } from '../data'
 import { useApp } from '../store'
-import { Badge, CourseTile, PageTitle, ProgressBar, btnPrimary, btnSecondary, card, courseProgress, Notice } from '../components/ui'
+import { Badge, CATEGORY_TONE, CourseTile, PageTitle, ProgressBar, btnPrimary, btnSecondary, card, courseProgress, Notice } from '../components/ui'
 import NotFound from './NotFound'
 
 const TYPE_ICON: Record<LessonType, typeof FileText> = { reading: FileText, video: PlayCircle, activity: Pencil }
@@ -105,7 +105,7 @@ export default function CourseDetail() {
         <div className="order-1 space-y-4 lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1 lg:order-2">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-3">
-              <Badge tone="brand">{cat.short}</Badge>
+              <Badge tone={CATEGORY_TONE[course.category]}>{cat.short}</Badge>
               <Badge>{course.subject}</Badge>
               {course.level && <Badge>{course.level}</Badge>}
               {!course.open && <Badge tone="warn">Intake closed</Badge>}
